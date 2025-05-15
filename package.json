@@ -1,0 +1,39 @@
+{
+  "name": "camping-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@react-google-maps/api": "^2.20.6",
+    "@types/google.maps": "^3.58.1",
+    "axios": "^0.27.2",
+    "core-js": "^3.25.0",
+    "date-fns": "^2.29.2",
+    "jwt-decode": "^3.1.2",
+    "leaflet": "^1.8.0",
+    "react-datepicker": "^8.3.0",
+    "react-hot-toast": "^2.5.2",
+    "vue": "^2.7.10",
+    "vue-router": "^3.6.5",
+    "vue2-leaflet": "^2.7.1",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/eslint-parser": "^7.27.0",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-plugin-router": "~5.0.8",
+    "@vue/cli-plugin-vuex": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.23.0",
+    "eslint-plugin-vue": "^9.4.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  }
+}
