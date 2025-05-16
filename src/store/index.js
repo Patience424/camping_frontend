@@ -63,21 +63,36 @@ export default new Vuex.Store({
     async login({ commit }, credentials) {
       try {
         commit('setLoading', true)
+        console.log('Store: Sending login request with credentials:', credentials)
         const response = await api.post('/auth/login', credentials)
+        console.log('Store: Login response:', response)
         
-        const { token, user } = response.data
+        if (!response) {
+          console.error('Store: No response received')
+          throw new Error('No response received from server')
+        }
         
-        commit('setToken', token)
-        commit('setUser', user)
+        // Check if response has the expected structure
+        if (!response.token || !response.user) {
+          console.error('Store: Invalid response format:', response)
+          throw new Error('Invalid response format from server')
+        }
+        
+        // Store the token and user data
+        commit('setToken', response.token)
+        commit('setUser', response.user)
         
         commit('setNotification', {
           type: 'success',
-          message: 'Successfully logged in!'
+          message: response.message || 'Successfully logged in!'
         })
         
-        return user
+        return response.user
       } catch (error) {
-        console.error('Login error:', error.response || error)
+        console.error('Store: Login error:', error)
+        if (error.response) {
+          console.error('Store: Error response:', error.response)
+        }
         throw error
       } finally {
         commit('setLoading', false)
