@@ -20,18 +20,18 @@ api.interceptors.request.use(
 // Add response interceptor for logging
 api.interceptors.response.use(
   response => {
+    // Response is already transformed by the axios instance interceptor
     console.log('API Response:', {
-      status: response.status,
-      data: response.data,
-      url: response.config.url
+      data: response,
+      url: response?.request?.responseURL || 'unknown'
     })
-    return response.data
+    return response
   },
   error => {
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
-      url: error.config?.url
+      url: error.config?.url || 'unknown'
     })
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
@@ -57,19 +57,19 @@ export const userAPI = {
 }
 
 export const campingSpotAPI = {
-  getAll: (params) => api.get('/api/users/camping-spots', { params }),
-  getById: (id) => api.get(`/api/users/camping-spots/${id}`),
-  create: (data) => api.post('/api/users/camping-spots', data),
-  update: (id, data) => api.put(`/api/users/camping-spots/${id}`, data),
-  delete: (id) => api.delete(`/api/users/camping-spots/${id}`),
-  getFeatured: () => api.get('/api/users/camping-spots/featured'),
-  search: (params) => api.get('/api/users/camping-spots/search', { params }),
-  getCampingSpots: (params) => api.get('/api/users/camping-spots', { params }),
-  checkAvailability: (id, data) => api.post(`/api/users/camping-spots/${id}/check-availability`, data),
-  createReview: (id, data) => api.post(`/api/users/camping-spots/${id}/reviews`, data),
-  uploadImages: (id, formData) => api.post(`/api/users/camping-spots/${id}/images`, formData),
-  deleteImage: (id, imageId) => api.delete(`/api/users/camping-spots/${id}/images/${imageId}`),
-  createBooking: (id, data) => api.post(`/api/users/camping-spots/${id}/bookings`, data)
+  getAll: (params) => api.get('/users/camping-spots', { params }),
+  getById: (id) => api.get(`/users/camping-spots/${id}`),
+  create: (data) => api.post('/users/camping-spots', data),
+  update: (id, data) => api.put(`/users/camping-spots/${id}`, data),
+  delete: (id) => api.delete(`/users/camping-spots/${id}`),
+  getFeatured: () => api.get('/users/camping-spots/featured'),
+  search: (params) => api.get('/users/camping-spots/search', { params }),
+  getCampingSpots: (params) => api.get('/users/camping-spots', { params }),
+  checkAvailability: (id, data) => api.post(`/users/camping-spots/${id}/check-availability`, data),
+  createReview: (id, data) => api.post(`/users/camping-spots/${id}/reviews`, data),
+  uploadImages: (id, formData) => api.post(`/users/camping-spots/${id}/images`, formData),
+  deleteImage: (id, imageId) => api.delete(`/users/camping-spots/${id}/images/${imageId}`),
+  createBooking: (id, data) => api.post(`/users/camping-spots/${id}/bookings`, data)
 }
 
 export const bookingAPI = {
