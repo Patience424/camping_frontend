@@ -26,7 +26,7 @@
           </svg>
           <span>{{ spot.location }}</span>
           <span class="mx-2">•</span>
-          <div v-if="spot.averageRating" class="flex items-center">
+          <div v-if="spot.averageRating !== null && spot.averageRating !== undefined" class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
@@ -204,13 +204,13 @@
                   :key="rating"
                   xmlns="http://www.w3.org/2000/svg" 
                   class="h-4 w-4"
-                  :class="rating <= spot.averageRating ? 'text-yellow-400' : 'text-neutral-300'"
+                  :class="spot.averageRating && rating <= spot.averageRating ? 'text-yellow-400' : 'text-neutral-300'"
                   viewBox="0 0 20 20" 
                   fill="currentColor"
                 >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                <span class="ml-1">{{ spot.averageRating.toFixed(1) }}</span>
+                <span v-if="spot.averageRating" class="ml-1">{{ spot.averageRating.toFixed(1) }}</span>
                 <span class="ml-1">({{ spot.reviewCount || 0 }} reviews)</span>
               </div>
             </div>
@@ -384,7 +384,12 @@ export default {
     ...mapGetters(['isAuthenticated', 'userId']),
     
     spotId() {
-      return parseInt(this.id)
+      const id = parseInt(this.id)
+      if (isNaN(id)) {
+        console.error('Invalid camping spot ID:', this.id)
+        return null
+      }
+      return id
     },
     
     minDate() {
@@ -400,10 +405,18 @@ export default {
     async fetchCampingSpot() {
       try {
         this.isLoading = true
+        console.log('Fetching camping spot with ID:', this.spotId)
+        if (!this.spotId) {
+          throw new Error('Invalid camping spot ID')
+        }
         const response = await campingSpotAPI.getById(this.spotId)
-        this.spot = response.data
+        console.log('Camping spot response:', response)
+        this.spot = response
       } catch (error) {
         console.error('Error fetching camping spot:', error)
+        console.error('Error response:', error.response)
+        console.error('Error status:', error.response?.status)
+        console.error('Error data:', error.response?.data)
         this.$store.commit('setNotification', {
           type: 'error',
           message: 'Failed to load camping spot details'
@@ -555,7 +568,7 @@ export default {
       this.fetchCampingSpot()
     }
   },
-  mounted() {
+  created() {
     this.fetchCampingSpot()
   }
 }

@@ -31,9 +31,28 @@ instance.interceptors.request.use(
 // Response interceptor for API calls
 instance.interceptors.response.use(
   response => {
-    return response
+    console.log('Axios: Response interceptor:', {
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    })
+    
+    // Check if response has data
+    if (!response.data) {
+      console.error('Axios: No data in response')
+      return Promise.reject(new Error('No data received from server'))
+    }
+    
+    // Return the response data
+    return response.data
   },
   error => {
+    console.error('Axios: Response error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    })
+    
     const originalRequest = error.config
     
     // If the error response is 401 (Unauthorized) and not a retry

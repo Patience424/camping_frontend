@@ -1,36 +1,41 @@
-import axios from 'axios'
+import { api } from '@/plugins/axios'
 
-const api = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:3000/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
-// Add a request interceptor to add the auth token to requests
+// Add request interceptor for logging
 api.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    console.log('API Request:', {
+      method: config.method,
+      url: config.url,
+      params: config.params,
+      data: config.data
+    })
     return config
   },
   error => {
+    console.error('API Request Error:', error)
     return Promise.reject(error)
   }
 )
 
-// Add a response interceptor to handle common errors
+// Add response interceptor for logging
 api.interceptors.response.use(
-  response => response,
+  response => {
+    // Response is already transformed by the axios instance interceptor
+    console.log('API Response:', {
+      data: response,
+      url: response?.request?.responseURL || 'unknown'
+    })
+    return response
+  },
   error => {
-    if (error.response) {
-      // Handle 401 Unauthorized errors
-      if (error.response.status === 401) {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
-      }
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url || 'unknown'
+    })
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
     }
     return Promise.reject(error)
   }
@@ -61,7 +66,10 @@ export const campingSpotAPI = {
   search: (params) => api.get('/users/camping-spots/search', { params }),
   getCampingSpots: (params) => api.get('/users/camping-spots', { params }),
   checkAvailability: (id, data) => api.post(`/users/camping-spots/${id}/check-availability`, data),
-  createReview: (id, data) => api.post(`/users/camping-spots/${id}/reviews`, data)
+  createReview: (id, data) => api.post(`/users/camping-spots/${id}/reviews`, data),
+  uploadImages: (id, formData) => api.post(`/users/camping-spots/${id}/images`, formData),
+  deleteImage: (id, imageId) => api.delete(`/users/camping-spots/${id}/images/${imageId}`),
+  createBooking: (id, data) => api.post(`/users/camping-spots/${id}/bookings`, data)
 }
 
 export const bookingAPI = {
@@ -94,7 +102,11 @@ export const adminAPI = {
 export const ownerAPI = {
   getDashboardStats: () => api.get('/owner/dashboard/stats'),
   getCampingSpots: () => api.get('/owner/camping-spots'),
-  getBookings: () => api.get('/owner/bookings'),
+  getCampingSpotById: (id) => api.get(`/owner/camping-spots/${id}`),
+  createCampingSpot: (data) => api.post('/owner/camping-spots', data),
+  updateCampingSpot: (id, data) => api.put(`/owner/camping-spots/${id}`, data),
+  deleteCampingSpot: (id) => api.delete(`/owner/camping-spots/${id}`),
+  getBookings: () => api.get('/users/bookings'),
   getReviews: () => api.get('/owner/reviews')
 }
 
