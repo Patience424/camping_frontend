@@ -8,13 +8,16 @@
     </div>
 
     <div class="spots-list">
-      <div v-if="campingSpots.length" class="spots-grid">
+      <div v-if="isLoading" class="loading">
+        Loading camping spots...
+      </div>
+      <div v-else-if="campingSpots.length" class="spots-grid">
         <div v-for="spot in campingSpots" :key="spot.id" class="spot-card">
           <div class="image-carousel">
             <img 
               v-for="(image, index) in spot.images" 
               :key="index"
-              :src="image.url" 
+              :src="image" 
               :alt="spot.name"
               class="spot-image"
               :class="{ active: currentImageIndex[spot.id] === index }"
@@ -49,8 +52,8 @@
             <h3>{{ spot.name }}</h3>
             <p class="location">{{ spot.location }}</p>
             <p class="price">€{{ spot.pricePerNight }} per night</p>
-            <div class="status" :class="spot.status.toLowerCase()">
-              {{ spot.status }}
+            <div class="status" :class="(spot.status || 'active').toLowerCase()">
+              {{ spot.status || 'Active' }}
             </div>
             <div class="actions">
               <router-link :to="`/owner/camping-spots/${spot.id}/edit`" class="btn-edit">
@@ -69,47 +72,44 @@
 </template>
 
 <script>
+import { ownerAPI } from '@/services/api'
+
 export default {
   name: 'OwnerCampingSpots',
   data() {
     return {
       campingSpots: [],
-      currentImageIndex: {}
+      currentImageIndex: {},
+      isLoading: false
     }
   },
   async created() {
-    // TODO: Fetch camping spots from API
-    this.campingSpots = [
-      {
-        id: 1,
-        name: 'Mountain View Camp',
-        location: 'Rocky Mountains, CO',
-        pricePerNight: 75,
-        status: 'Active',
-        images: [
-          { url: 'https://example.com/camp1.jpg' },
-          { url: 'https://example.com/camp2.jpg' },
-          { url: 'https://example.com/camp3.jpg' }
-        ]
-      },
-      {
-        id: 2,
-        name: 'Lakeside Retreat',
-        location: 'Lake Tahoe, CA',
-        pricePerNight: 95,
-        status: 'Active',
-        images: [
-          { url: 'https://example.com/camp4.jpg' },
-          { url: 'https://example.com/camp5.jpg' }
-        ]
-      }
-    ]
-    // Initialize current image index for each spot
-    this.campingSpots.forEach(spot => {
-      this.$set(this.currentImageIndex, spot.id, 0)
-    })
+    await this.fetchCampingSpots()
   },
   methods: {
+    async fetchCampingSpots() {
+      try {
+        this.isLoading = true
+        const response = await ownerAPI.getCampingSpots()
+        console.log('API Response:', response)
+        console.log('Response data:', response.data)
+        this.campingSpots = Array.isArray(response.data.data) ? response.data.data : []
+        console.log('Camping spots after assignment:', this.campingSpots)
+        
+        // Initialize current image index for each spot
+        this.campingSpots.forEach(spot => {
+          this.$set(this.currentImageIndex, spot.id, 0)
+        })
+      } catch (error) {
+        console.error('Error fetching camping spots:', error)
+        this.$store.commit('setNotification', {
+          type: 'error',
+          message: 'Failed to load camping spots'
+        })
+      } finally {
+        this.isLoading = false
+      }
+    },
     prevImage(spotId) {
       if (this.currentImageIndex[spotId] > 0) {
         this.$set(this.currentImageIndex, spotId, this.currentImageIndex[spotId] - 1)
@@ -126,8 +126,20 @@ export default {
     },
     async deleteSpot(id) {
       if (confirm('Are you sure you want to delete this camping spot?')) {
-        // TODO: Implement delete functionality
-        this.campingSpots = this.campingSpots.filter(spot => spot.id !== id)
+        try {
+          await ownerAPI.deleteCampingSpot(id)
+          this.campingSpots = this.campingSpots.filter(spot => spot.id !== id)
+          this.$store.commit('setNotification', {
+            type: 'success',
+            message: 'Camping spot deleted successfully'
+          })
+        } catch (error) {
+          console.error('Error deleting camping spot:', error)
+          this.$store.commit('setNotification', {
+            type: 'error',
+            message: 'Failed to delete camping spot'
+          })
+        }
       }
     }
   }
@@ -317,5 +329,12 @@ export default {
 
 .dot.active {
   background: white;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.1rem;
 }
 </style> 

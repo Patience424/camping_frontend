@@ -53,7 +53,7 @@
             <!-- Amenities filter (dropdown) -->
             <div class="relative">
               <button 
-                @click="toggleAmenitiesDropdown" 
+                @click.stop="toggleAmenitiesDropdown" 
                 class="form-input py-2 pl-8 pr-4 rounded-full text-sm flex items-center"
               >
                 <span>Amenities</span>
@@ -66,7 +66,7 @@
               </svg>
               
               <!-- Amenities dropdown -->
-              <div v-if="showAmenitiesDropdown" class="absolute top-full mt-2 left-0 bg-white rounded-lg shadow-lg p-3 z-10 w-56">
+              <div v-if="showAmenitiesDropdown" class="absolute top-full mt-2 left-0 bg-white rounded-lg shadow-lg p-3 z-10 w-56 amenities-dropdown" @click.stop>
                 <div v-for="amenity in amenitiesList" :key="amenity.id" class="flex items-center mb-2">
                   <input
                     type="checkbox"
@@ -78,8 +78,8 @@
                   <label :for="`amenity-${amenity.id}`" class="text-sm">{{ amenity.name }}</label>
                 </div>
                 <div class="mt-3 flex justify-end">
-                  <button @click="clearAmenities" class="text-xs text-neutral-500 mr-2">Clear</button>
-                  <button @click="applyAmenities" class="text-xs text-primary-500 font-medium">Apply</button>
+                  <button @click.stop="clearAmenities" class="text-xs text-neutral-500 mr-2">Clear</button>
+                  <button @click.stop="applyAmenities" class="text-xs text-primary-500 font-medium">Apply</button>
                 </div>
               </div>
             </div>
@@ -143,11 +143,11 @@
             </button>
             
             <button 
-              v-if="filters.selectedAmenities.length > 0" 
+              v-if="filters.appliedAmenities.length > 0" 
               @click="clearFilter('selectedAmenities')" 
               class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
             >
-              {{ filters.selectedAmenities.length }} amenities selected
+              {{ filters.appliedAmenities.length }} amenities selected
               <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
@@ -331,16 +331,16 @@ export default {
       showAmenitiesDropdown: false,
       showMapView: false,
       amenitiesList: [
-        { id: 'wifi', name: 'WiFi' },
-        { id: 'parking', name: 'Parking' },
-        { id: 'shower', name: 'Shower' },
-        { id: 'toilet', name: 'Toilet' },
-        { id: 'firepit', name: 'Fire Pit' },
-        { id: 'picnic_table', name: 'Picnic Table' },
-        { id: 'pets_allowed', name: 'Pets Allowed' },
-        { id: 'electricity', name: 'Electricity' },
-        { id: 'water', name: 'Water' },
-        { id: 'hiking', name: 'Hiking Trails' }
+        { id: 'WiFi', name: 'WiFi' },
+        { id: 'Parking', name: 'Parking' },
+        { id: 'Shower', name: 'Shower' },
+        { id: 'Toilet', name: 'Toilet' },
+        { id: 'Fire Pit', name: 'Fire Pit' },
+        { id: 'Picnic Table', name: 'Picnic Table' },
+        { id: 'Pets Allowed', name: 'Pets Allowed' },
+        { id: 'Electricity', name: 'Electricity' },
+        { id: 'Water', name: 'Water' },
+        { id: 'Hiking Trails', name: 'Hiking Trails' }
       ],
       isMobile: false
     }
@@ -421,9 +421,10 @@ export default {
         }
         
         const response = await campingSpotAPI.getCampingSpots(params)
+        console.log('Camping spots response:', response)
         
-        this.campingSpots = response.data.data || []
-        this.pagination = response.data.pagination || {
+        this.campingSpots = response.data || []
+        this.pagination = response.pagination || {
           page: 1,
           limit: 9,
           total: 0,
@@ -600,7 +601,7 @@ export default {
     
     // Close amenities dropdown when clicking outside
     document.addEventListener('click', (e) => {
-      if (this.showAmenitiesDropdown && !e.target.closest('.amenities-dropdown')) {
+      if (this.showAmenitiesDropdown && !e.target.closest('.amenities-dropdown') && !e.target.closest('button')) {
         this.showAmenitiesDropdown = false
       }
     })

@@ -106,7 +106,7 @@
         <button type="button" @click="$router.back()" class="btn-secondary">
           Cancel
         </button>
-        <button type="submit" class="btn-primary">
+        <button type="submit" class="btn-primary" :disabled="isSubmitting">
           {{ isEdit ? 'Update' : 'Create' }} Camping Spot
         </button>
       </div>
@@ -115,6 +115,8 @@
 </template>
 
 <script>
+import { ownerAPI } from '@/services/api'
+
 export default {
   name: 'OwnerCampingSpotForm',
   props: {
@@ -144,7 +146,8 @@ export default {
         'RV Hookup',
         'WiFi',
         'Pets Allowed'
-      ]
+      ],
+      isSubmitting: false
     }
   },
   computed: {
@@ -154,18 +157,23 @@ export default {
   },
   async created() {
     if (this.isEdit) {
-      // TODO: Fetch camping spot data from API
-      this.form = {
-        name: 'Mountain View Camp',
-        location: 'Rocky Mountains, CO',
-        description: 'Beautiful mountain view camping spot with amazing scenery.',
-        pricePerNight: 75,
-        capacity: 4,
-        images: [
-          { url: 'https://example.com/camp1.jpg' },
-          { url: 'https://example.com/camp2.jpg' }
-        ],
-        amenities: ['Electricity', 'Water', 'Fire Pit']
+      try {
+        const response = await ownerAPI.getCampingSpotById(this.id)
+        this.form = {
+          name: response.data.name,
+          location: response.data.location,
+          description: response.data.description,
+          pricePerNight: response.data.pricePerNight,
+          capacity: response.data.capacity,
+          images: response.data.images || [],
+          amenities: response.data.amenities || []
+        }
+      } catch (error) {
+        console.error('Error fetching camping spot:', error)
+        this.$store.commit('setNotification', {
+          type: 'error',
+          message: 'Failed to load camping spot details'
+        })
       }
     }
   },
@@ -207,22 +215,37 @@ export default {
     },
     async handleSubmit() {
       try {
-        // TODO: Implement actual image upload to server before saving the form
+        this.isSubmitting = true
+        
+        // Prepare form data
         const formData = {
           ...this.form,
           images: this.form.images.map(img => img.url)
         }
 
         if (this.isEdit) {
-          // TODO: Update camping spot
-          console.log('Updating camping spot:', formData)
+          await ownerAPI.updateCampingSpot(this.id, formData)
+          this.$store.commit('setNotification', {
+            type: 'success',
+            message: 'Camping spot updated successfully'
+          })
         } else {
-          // TODO: Create new camping spot
-          console.log('Creating new camping spot:', formData)
+          await ownerAPI.createCampingSpot(formData)
+          this.$store.commit('setNotification', {
+            type: 'success',
+            message: 'Camping spot created successfully'
+          })
         }
+        
         this.$router.push('/owner/camping-spots')
       } catch (error) {
         console.error('Error saving camping spot:', error)
+        this.$store.commit('setNotification', {
+          type: 'error',
+          message: error.response?.data?.message || 'Failed to save camping spot'
+        })
+      } finally {
+        this.isSubmitting = false
       }
     }
   }
