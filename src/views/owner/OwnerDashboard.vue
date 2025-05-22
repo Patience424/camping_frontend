@@ -94,29 +94,53 @@ export default {
           })
         ])
 
-        console.log('Stats response:', statsResponse)
-        console.log('Bookings response:', bookingsResponse)
+        console.log('Raw stats response:', statsResponse)
+        console.log('Raw bookings response:', bookingsResponse)
 
-        // Update dashboard stats
-        const stats = statsResponse.data
-        this.totalSpots = stats.totalSpots || 0
-        this.activeBookings = stats.activeBookings || 0
-        this.totalRevenue = stats.totalRevenue || 0
+        // Defensive check for stats data
+        if (!statsResponse || typeof statsResponse !== 'object') {
+          console.warn('Invalid stats response format:', statsResponse)
+          this.totalSpots = 0
+          this.activeBookings = 0
+          this.totalRevenue = 0
+        } else {
+          // Defensive checks for each stat
+          if (typeof statsResponse.totalSpots !== 'undefined') {
+            this.totalSpots = statsResponse.totalSpots
+          } else {
+            console.warn('totalSpots missing from stats response:', statsResponse)
+            this.totalSpots = 0
+          }
 
-        // Update recent bookings
-        const bookings = bookingsResponse.data || []
+          if (typeof statsResponse.activeBookings !== 'undefined') {
+            this.activeBookings = statsResponse.activeBookings
+          } else {
+            console.warn('activeBookings missing from stats response:', statsResponse)
+            this.activeBookings = 0
+          }
+
+          if (typeof statsResponse.totalRevenue !== 'undefined') {
+            this.totalRevenue = statsResponse.totalRevenue
+          } else {
+            console.warn('totalRevenue missing from stats response:', statsResponse)
+            this.totalRevenue = 0
+          }
+        }
+
+        // Update recent bookings with defensive checks
+        const bookings = Array.isArray(bookingsResponse) ? bookingsResponse : []
         console.log('Raw bookings data:', bookings)
         
         this.recentBookings = bookings.slice(0, 5).map(booking => {
           console.log('Processing booking:', booking)
           return {
-            id: booking.id,
-            campingSpotName: booking.campingSpot?.name || booking.spotName || 'Unknown Spot',
-            guestName: booking.user?.name || booking.userName || 'Unknown Guest',
-            checkIn: new Date(booking.startDate || booking.checkIn).toLocaleDateString(),
-            checkOut: new Date(booking.endDate || booking.checkOut).toLocaleDateString(),
-            status: booking.status || 'Unknown',
-            total: booking.total || 0
+            id: booking?.id || 'unknown',
+            campingSpotName: booking?.campingSpot?.name || booking?.spotName || 'Unknown Spot',
+            guestName: booking?.user?.name || booking?.userName || 'Unknown Guest',
+            checkIn: booking?.startDate || booking?.checkIn ? new Date(booking.startDate || booking.checkIn).toLocaleDateString() : 'Unknown',
+            checkOut: booking?.endDate || booking?.checkOut ? new Date(booking.endDate || booking.checkOut).toLocaleDateString() : 'Unknown',
+            status: booking?.status || 'Unknown',
+            total: booking?.total || 0
           }
         })
 

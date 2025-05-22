@@ -7,6 +7,7 @@
       </svg>
     </div>
 
+
     <div v-else-if="!spot" class="flex flex-col items-center justify-center min-h-screen">
       <svg class="w-16 h-16 text-neutral-300 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -39,25 +40,37 @@
       <!-- Image Gallery -->
       <div class="mb-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="relative h-96 rounded-lg overflow-hidden">
+          
+          <div v-if="spot.images && spot.images.length > 0" class="relative h-96 rounded-lg overflow-hidden">
             <img 
-              :src="spot.images[0]" 
+              :src="normalizedImages[0]?.url" 
               :alt="spot.name"
               class="w-full h-full object-cover"
-            >
+            />
+
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div v-for="(image, index) in spot.images.slice(1, 5)" :key="index" class="relative h-44 rounded-lg overflow-hidden">
+          <div v-if="normalizedImages.length > 1" class="grid grid-cols-2 gap-4">
+            <div
+              v-for="(image, index) in normalizedImages.slice(1, 5)"
+              :key="index"
+              class="relative h-44 rounded-lg overflow-hidden"
+            >
               <img 
-                :src="image" 
+                :src="image.url" 
                 :alt="`${spot.name} - Image ${index + 2}`"
                 class="w-full h-full object-cover"
               >
             </div>
           </div>
+
+          <div v-if="!spot.images || spot.images.length === 0" class="relative h-96 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
         </div>
         <button 
-          v-if="spot.images.length > 5"
+          v-if="spot.images && spot.images.length > 5"
           @click="showAllPhotos = true"
           class="mt-4 text-primary-600 hover:text-primary-700 font-medium"
         >
@@ -352,7 +365,18 @@ export default {
   },
   data() {
     return {
-      spot: null,
+      spot: {
+        images: [],
+        name: '',
+        location: '',
+        description: '',
+        pricePerNight: 0,
+        capacity: 1,
+        amenities: [],
+        reviews: [],
+        averageRating: null,
+        reviewCount: 0
+      },
       isLoading: true,
       showAllPhotos: false,
       showReviewForm: false,
@@ -382,7 +406,37 @@ export default {
   },
   computed: {
     ...mapGetters(['isAuthenticated', 'userId']),
-    
+    normalizedImages() {
+      console.log('Raw spot images:', this.spot?.images)
+      if (!this.spot || !this.spot.images) return []
+      
+      const normalized = this.spot.images.map(img => {
+        console.log('Processing image:', img)
+        let url = ''
+        
+        if (typeof img === 'string') {
+          url = img
+        } else if (typeof img === 'object') {
+          url = img.url || img.path || ''
+        }
+        
+        if (!url) {
+          console.warn('Invalid image format:', img)
+          return null
+        }
+        
+        // If it's already a full URL, use it as is
+        if (url.startsWith('http')) {
+          return { url }
+        }
+        
+        // Otherwise, prepend the API base URL
+        return { url: `http://localhost:3000${url.startsWith('/') ? url : '/' + url}` }
+      }).filter(Boolean)
+      
+      console.log('Normalized images:', normalized)
+      return normalized
+    },
     spotId() {
       const id = parseInt(this.id)
       if (isNaN(id)) {
@@ -410,8 +464,19 @@ export default {
           throw new Error('Invalid camping spot ID')
         }
         const response = await campingSpotAPI.getById(this.spotId)
-        console.log('Camping spot response:', response)
+        console.log('Camping spot full response:', JSON.stringify(response, null, 2))
+        console.log('Response type:', typeof response)
+        console.log('Response data type:', typeof response.data)
+        console.log('Response images:', response?.images)
+        console.log('Response images type:', typeof response?.images)
+        console.log('Response images is array:', Array.isArray(response?.images))
+        
         this.spot = response
+        console.log('Spot after assignment:', JSON.stringify(this.spot, null, 2))
+        console.log('Spot images after assignment:', this.spot.images)
+        console.log('Spot images type after assignment:', typeof this.spot.images)
+        console.log('Spot images is array after assignment:', Array.isArray(this.spot.images))
+
       } catch (error) {
         console.error('Error fetching camping spot:', error)
         console.error('Error response:', error.response)
@@ -424,6 +489,13 @@ export default {
       } finally {
         this.isLoading = false
       }
+    },
+    getImageUrl(path) {
+    if (!path) return '';
+    if (typeof path === 'object') path = path.url; // support { url: '...' }
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `http://localhost:3000${path.startsWith('/') ? path : '/' + path}`;
     },
 
     formatDate(date) {
@@ -507,13 +579,13 @@ export default {
           guestCount: this.booking.guestCount
         })
 
-        if (response.data.available) {
+        if (response.available) {
           this.availabilityStatus = 'available'
-          this.availabilityMessage = 'These dates are available!'
+          this.availabilityMessage = response.message || 'These dates are available!'
           this.showBookingModal = true
         } else {
           this.availabilityStatus = 'unavailable'
-          this.availabilityMessage = 'These dates are not available. Please try different dates.'
+          this.availabilityMessage = response.message || 'These dates are not available. Please try different dates.'
         }
       } catch (error) {
         console.error('Error checking availability:', error)

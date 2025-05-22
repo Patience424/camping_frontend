@@ -103,11 +103,24 @@ export const ownerAPI = {
   getDashboardStats: () => api.get('/owner/dashboard/stats'),
   getCampingSpots: () => api.get('/owner/camping-spots'),
   getCampingSpotById: (id) => api.get(`/owner/camping-spots/${id}`),
-  createCampingSpot: (data) => api.post('/owner/camping-spots', data),
-  updateCampingSpot: (id, data) => api.put(`/owner/camping-spots/${id}`, data),
+  createCampingSpot: (data) => api.post('/owner/camping-spots', data, {
+    headers: {
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+    }
+  }),
+  updateCampingSpot: (id, data) => api.put(`/owner/camping-spots/${id}`, data, {
+    headers: {
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+    }
+  }),
   deleteCampingSpot: (id) => api.delete(`/owner/camping-spots/${id}`),
   getBookings: () => api.get('/users/bookings'),
-  getReviews: () => api.get('/owner/reviews')
+  getReviews: () => api.get('/owner/reviews'),
+  uploadImages: (id, formData) => api.post(`/owner/camping-spots/${id}/images`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
 }
 
 export default api 

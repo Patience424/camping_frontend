@@ -86,7 +86,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
-  name: 'AppFooter'
+  name: 'AppFooter',
+  computed: {
+    ...mapGetters(['isAuthenticated'])
+  }
 }
 </script>

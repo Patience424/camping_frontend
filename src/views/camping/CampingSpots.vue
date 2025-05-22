@@ -207,7 +207,13 @@
               @click="viewSpotDetails(spot.id)"
             >
               <div class="relative h-48 md:h-56 rounded-lg overflow-hidden mb-4">
-                <img :src="getFirstImage(spot.images)" :alt="spot.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                <img 
+                  :src="getFirstImage(spot.images)" 
+                  :alt="spot.name" 
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  @error="handleImageError"
+                  loading="lazy"
+                >
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
                   <div v-if="spot.averageRating" class="flex items-center bg-black/50 rounded-full px-2 py-1 w-fit">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -500,29 +506,62 @@ export default {
     },
     
     getFirstImage(images) {
-      // Parse images string or return a default image
+      const defaultImage = 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+      
       try {
-        if (!images) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+        if (!images) return defaultImage
         
         // If images is a JSON string, parse it and get the first one
         if (typeof images === 'string') {
-          const parsedImages = JSON.parse(images)
-          if (Array.isArray(parsedImages) && parsedImages.length > 0) {
-            return parsedImages[0]
+          try {
+            const parsedImages = JSON.parse(images)
+            if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+              const firstImage = parsedImages[0]
+              // Check if the image URL is valid
+              if (this.isValidImageUrl(firstImage)) {
+                return firstImage
+              }
+            }
+          } catch (e) {
+            // If parsing fails, try using the string directly
+            if (this.isValidImageUrl(images)) {
+              return images
+            }
           }
-          return images // Just return the string if not an array
         }
         
         // If images is already an array, get the first one
         if (Array.isArray(images) && images.length > 0) {
-          return images[0]
+          const firstImage = images[0]
+          if (this.isValidImageUrl(firstImage)) {
+            return firstImage
+          }
         }
         
-        return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+        return defaultImage
       } catch (e) {
         console.error('Error parsing images:', e)
-        return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+        return defaultImage
       }
+    },
+    
+    isValidImageUrl(url) {
+      if (!url) return false
+      if (typeof url !== 'string') return false
+      if (url.startsWith('blob:')) return false
+      
+      // Check if the URL is a valid image URL
+      try {
+        const urlObj = new URL(url)
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+      } catch (e) {
+        return false
+      }
+    },
+    
+    handleImageError(event) {
+      console.warn('Image failed to load:', event.target.src)
+      event.target.src = 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
     },
     
     truncateDescription(description, length) {
@@ -634,3 +673,21 @@ export default {
   }
 }
 </script>
+<style scoped>
+.spot-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  transition: transform 0.2s ease-in-out;
+}
+
+.spot-image:hover {
+  transform: scale(1.05);
+}
+
+.image-container {
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+</style>

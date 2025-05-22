@@ -15,14 +15,15 @@
         <div v-for="spot in campingSpots" :key="spot.id" class="spot-card">
           <div class="image-carousel">
             <img 
-              v-for="(image, index) in spot.images" 
+              v-for="(image, index) in (spot.images || [])" 
               :key="index"
-              :src="image" 
+              :src="getImageUrl(image)" 
               :alt="spot.name"
               class="spot-image"
               :class="{ active: currentImageIndex[spot.id] === index }"
+              @error="e => e.target.src = 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'"
             >
-            <div v-if="spot.images.length > 1" class="carousel-controls">
+            <div v-if="(spot.images || []).length > 1" class="carousel-controls">
               <button 
                 @click="prevImage(spot.id)" 
                 class="carousel-btn prev"
@@ -33,14 +34,14 @@
               <button 
                 @click="nextImage(spot.id)" 
                 class="carousel-btn next"
-                :disabled="currentImageIndex[spot.id] === spot.images.length - 1"
+                :disabled="currentImageIndex[spot.id] === (spot.images || []).length - 1"
               >
                 ›
               </button>
             </div>
-            <div v-if="spot.images.length > 1" class="carousel-dots">
+            <div v-if="(spot.images || []).length > 1" class="carousel-dots">
               <button
-                v-for="(_, index) in spot.images"
+                v-for="(_, index) in (spot.images || [])"
                 :key="index"
                 @click="setImageIndex(spot.id, index)"
                 class="dot"
@@ -87,13 +88,33 @@ export default {
     await this.fetchCampingSpots()
   },
   methods: {
+    getImageUrl(image) {
+      if (!image) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+      
+      // If image is an object with url property
+      if (typeof image === 'object' && image.url) {
+        return this.getImageUrl(image.url)
+      }
+      
+      // If image is a string
+      if (typeof image === 'string') {
+        // If it's a full URL, return it
+        if (image.startsWith('http')) {
+          return image
+        }
+        // If it's a relative path, prepend the API base URL
+        return `http://localhost:3000${image.startsWith('/') ? image : '/' + image}`
+      }
+      
+      return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    },
     async fetchCampingSpots() {
       try {
         this.isLoading = true
         const response = await ownerAPI.getCampingSpots()
         console.log('API Response:', response)
         console.log('Response data:', response.data)
-        this.campingSpots = Array.isArray(response.data.data) ? response.data.data : []
+        this.campingSpots = Array.isArray(response.data) ? response.data : []
         console.log('Camping spots after assignment:', this.campingSpots)
         
         // Initialize current image index for each spot
@@ -117,7 +138,7 @@ export default {
     },
     nextImage(spotId) {
       const spot = this.campingSpots.find(s => s.id === spotId)
-      if (this.currentImageIndex[spotId] < spot.images.length - 1) {
+      if (this.currentImageIndex[spotId] < (spot.images || []).length - 1) {
         this.$set(this.currentImageIndex, spotId, this.currentImageIndex[spotId] + 1)
       }
     },

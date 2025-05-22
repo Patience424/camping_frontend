@@ -64,7 +64,11 @@
         <div class="image-upload-container">
           <div class="image-preview-grid">
             <div v-for="(image, index) in form.images" :key="index" class="image-preview">
-              <img :src="image.url" :alt="'Camping spot image ' + (index + 1)">
+              <img 
+                :src="getImageUrl(image)" 
+                :alt="'Camping spot image ' + (index + 1)"
+                @error="e => e.target.src = 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'"
+              >
               <button type="button" @click="removeImage(index)" class="remove-image">
                 ×
               </button>
@@ -159,14 +163,42 @@ export default {
     if (this.isEdit) {
       try {
         const response = await ownerAPI.getCampingSpotById(this.id)
-        this.form = {
-          name: response.data.name,
-          location: response.data.location,
-          description: response.data.description,
-          pricePerNight: response.data.pricePerNight,
-          capacity: response.data.capacity,
-          images: response.data.images || [],
-          amenities: response.data.amenities || []
+        console.log('Camping spot response (full):', JSON.stringify(response, null, 2))
+        console.log('Camping spot images:', response?.images)
+        
+        if (response) {
+          const spotData = response
+          // Ensure images is an array and each image has the correct format
+          const formattedImages = Array.isArray(spotData.images) 
+            ? spotData.images.map(img => {
+                console.log('Processing image:', img)
+                if (typeof img === 'string') {
+                  return { url: img, isNew: false }
+                }
+                if (typeof img === 'object') {
+                  return { 
+                    url: img.url || img.path || img, 
+                    isNew: false 
+                  }
+                }
+                return null
+              }).filter(Boolean)
+            : []
+          
+          console.log('Formatted images:', formattedImages)
+          
+          this.form = {
+            name: spotData.name || '',
+            location: spotData.location || '',
+            description: spotData.description || '',
+            pricePerNight: spotData.pricePerNight || 0,
+            capacity: spotData.capacity || 1,
+            images: formattedImages,
+            amenities: Array.isArray(spotData.amenities) ? spotData.amenities : []
+          }
+          console.log('Form data after loading:', JSON.stringify(this.form, null, 2))
+        } else {
+          throw new Error('Invalid response format')
         }
       } catch (error) {
         console.error('Error fetching camping spot:', error)
@@ -178,6 +210,26 @@ export default {
     }
   },
   methods: {
+    getImageUrl(image) {
+      if (!image) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+      
+      // If image is an object with url property
+      if (typeof image === 'object' && image.url) {
+        return this.getImageUrl(image.url)
+      }
+      
+      // If image is a string
+      if (typeof image === 'string') {
+        // If it's a full URL, return it
+        if (image.startsWith('http')) {
+          return image
+        }
+        // If it's a relative path, prepend the API base URL
+        return `http://localhost:3000${image.startsWith('/') ? image : '/' + image}`
+      }
+      
+      return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    },
     triggerFileInput() {
       this.$refs.fileInput.click()
     },
@@ -197,13 +249,18 @@ export default {
         }
 
         try {
-          // TODO: Implement actual image upload to server
-          // For now, we'll create a local URL
+          // Create a preview URL for the image
           const imageUrl = URL.createObjectURL(file)
-          this.form.images.push({ url: imageUrl, file })
+          // Add both the preview URL and the file object
+          this.form.images.push({ 
+            url: imageUrl,
+            file,
+            isNew: true  // Mark as new image for upload
+          })
+          console.log('Added new image:', { url: imageUrl, file })
         } catch (error) {
-          console.error('Error uploading image:', error)
-          alert('Error uploading image')
+          console.error('Error creating image preview:', error)
+          alert('Error creating image preview')
         }
       }
 
@@ -216,21 +273,54 @@ export default {
     async handleSubmit() {
       try {
         this.isSubmitting = true
+        console.log('Starting form submission with images:', JSON.stringify(this.form.images, null, 2))
         
-        // Prepare form data
-        const formData = {
-          ...this.form,
-          images: this.form.images.map(img => img.url)
+        // Create FormData for the request
+        const formData = new FormData()
+        
+        // Add basic camping spot data
+        formData.append('name', this.form.name)
+        formData.append('location', this.form.location)
+        formData.append('description', this.form.description)
+        formData.append('pricePerNight', this.form.pricePerNight)
+        formData.append('capacity', this.form.capacity)
+        formData.append('amenities', JSON.stringify(this.form.amenities))
+        
+        // Handle images
+        const newImages = this.form.images.filter(img => img.isNew)
+        const existingImages = this.form.images.filter(img => !img.isNew)
+        
+        console.log('New images to upload:', JSON.stringify(newImages, null, 2))
+        console.log('Existing images:', JSON.stringify(existingImages, null, 2))
+        
+        // Add new image files
+        newImages.forEach(img => {
+          if (img.file) {
+            formData.append('images', img.file)
+          }
+        })
+        
+        // Add existing image URLs
+        if (existingImages.length > 0) {
+          formData.append('existingImages', JSON.stringify(existingImages.map(img => img.url)))
+        }
+
+        // Log all FormData entries
+        console.log('FormData entries:')
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}:`, value)
         }
 
         if (this.isEdit) {
-          await ownerAPI.updateCampingSpot(this.id, formData)
+          const response = await ownerAPI.updateCampingSpot(this.id, formData)
+          console.log('Update response:', response)
           this.$store.commit('setNotification', {
             type: 'success',
             message: 'Camping spot updated successfully'
           })
         } else {
-          await ownerAPI.createCampingSpot(formData)
+          const response = await ownerAPI.createCampingSpot(formData)
+          console.log('Create response:', response)
           this.$store.commit('setNotification', {
             type: 'success',
             message: 'Camping spot created successfully'
@@ -240,9 +330,14 @@ export default {
         this.$router.push('/owner/camping-spots')
       } catch (error) {
         console.error('Error saving camping spot:', error)
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        })
         this.$store.commit('setNotification', {
           type: 'error',
-          message: error.response?.data?.message || 'Failed to save camping spot'
+          message: error.response?.data?.message || error.message || 'Failed to save camping spot'
         })
       } finally {
         this.isSubmitting = false

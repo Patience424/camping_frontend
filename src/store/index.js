@@ -104,7 +104,8 @@ export default new Vuex.Store({
         commit('setLoading', true)
         const response = await api.post('/auth/register', userData)
         
-        const { token, user } = response.data
+        // Response is already the data object from the axios interceptor
+        const { token, user } = response
         
         commit('setToken', token)
         commit('setUser', user)
@@ -147,7 +148,8 @@ export default new Vuex.Store({
         
         // Token still valid, get current user profile
         const response = await api.get('/auth/profile')
-        commit('setUser', response.data.user)
+        // The response is already transformed by axios interceptor
+        commit('setUser', response.user)
         return true
       } catch (error) {
         console.error('Auth check error:', error)

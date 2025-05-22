@@ -61,8 +61,8 @@
             </transition>
           </div>
           <div v-else class="flex">
-            <router-link to="/login" class="btn-outline text-sm mr-2">Log in</router-link>
-            <router-link to="/register" class="btn-primary text-sm">Sign up</router-link>
+            <router-link v-if="!isAuthenticated" to="/login" class="btn-outline text-sm mr-2">Log in</router-link>
+            <router-link v-if="!isAuthenticated" to="/register" class="btn-primary text-sm">Sign up</router-link>
           </div>
         </div>
         
