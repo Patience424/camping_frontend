@@ -17,8 +17,10 @@ const instance = axios.create({
 instance.interceptors.request.use(
   config => {
     const token = store.state.token
+    console.log('Axios: Request interceptor - Token:', token)
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
+      console.log('Axios: Request interceptor - Headers:', config.headers)
     }
     return config
   },
@@ -50,7 +52,12 @@ instance.interceptors.response.use(
     console.error('Axios: Response error:', {
       status: error.response?.status,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
     })
     
     const originalRequest = error.config

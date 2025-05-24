@@ -42,10 +42,25 @@
         <h2>Recent Bookings</h2>
         <div v-if="recentBookings.length" class="bookings-list">
           <div v-for="booking in recentBookings" :key="booking.id" class="booking-card">
-            <h4>{{ booking.campingSpotName }}</h4>
-            <p>Guest: {{ booking.guestName }}</p>
-            <p>Dates: {{ booking.checkIn }} - {{ booking.checkOut }}</p>
-            <p>Status: {{ booking.status }}</p>
+            <div class="booking-header">
+              <h4>{{ booking.campingSpotName }}</h4>
+              <span class="status-badge" :class="booking.status.toLowerCase()">
+                {{ formatStatus(booking.status) }}
+              </span>
+            </div>
+            <div class="booking-details">
+              <p><strong>Guest:</strong> {{ booking.guestName }}</p>
+              <p><strong>Dates:</strong> {{ booking.checkIn }} - {{ booking.checkOut }}</p>
+              <p><strong>Total:</strong> €{{ booking.total.toFixed(2) }}</p>
+              <div class="booking-actions" v-if="booking.status === 'PENDING'">
+                <button @click="updateBookingStatus(booking.id, 'CONFIRMED')" class="btn-confirm">
+                  Confirm Booking
+                </button>
+                <button @click="updateBookingStatus(booking.id, 'CANCELLED')" class="btn-cancel">
+                  Cancel Booking
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <p v-else>No recent bookings</p>
@@ -78,6 +93,34 @@ export default {
     await this.fetchDashboardData()
   },
   methods: {
+    formatStatus(status) {
+      if (!status) return 'Unknown'
+      // Convert status to title case and handle special cases
+      const statusMap = {
+        'PENDING': 'Pending',
+        'CONFIRMED': 'Confirmed',
+        'CANCELLED': 'Cancelled',
+        'COMPLETED': 'Completed'
+      }
+      return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()
+    },
+    async updateBookingStatus(bookingId, newStatus) {
+      try {
+        await ownerAPI.updateBookingStatus(bookingId, newStatus)
+        // Refresh the dashboard data
+        await this.fetchDashboardData()
+        this.$store.commit('setNotification', {
+          type: 'success',
+          message: `Booking ${newStatus.toLowerCase()} successfully`
+        })
+      } catch (error) {
+        console.error('Error updating booking status:', error)
+        this.$store.commit('setNotification', {
+          type: 'error',
+          message: 'Failed to update booking status'
+        })
+      }
+    },
     async fetchDashboardData() {
       try {
         this.isLoading = true
@@ -86,7 +129,7 @@ export default {
         const [statsResponse, bookingsResponse] = await Promise.all([
           ownerAPI.getDashboardStats().catch(error => {
             console.error('Error fetching dashboard stats:', error)
-            return { data: { totalSpots: 0, activeBookings: 0, totalRevenue: 0 } }
+            return { stats: { totalSpots: 0, activeBookings: 0, totalRevenue: 0 } }
           }),
           ownerAPI.getBookings().catch(error => {
             console.error('Error fetching bookings:', error)
@@ -97,39 +140,18 @@ export default {
         console.log('Raw stats response:', statsResponse)
         console.log('Raw bookings response:', bookingsResponse)
 
-        // Defensive check for stats data
-        if (!statsResponse || typeof statsResponse !== 'object') {
-          console.warn('Invalid stats response format:', statsResponse)
-          this.totalSpots = 0
-          this.activeBookings = 0
-          this.totalRevenue = 0
-        } else {
-          // Defensive checks for each stat
-          if (typeof statsResponse.totalSpots !== 'undefined') {
-            this.totalSpots = statsResponse.totalSpots
-          } else {
-            console.warn('totalSpots missing from stats response:', statsResponse)
-            this.totalSpots = 0
-          }
+        // Extract stats from the nested response
+        const stats = statsResponse?.stats || {}
+        console.log('Extracted stats:', stats)
 
-          if (typeof statsResponse.activeBookings !== 'undefined') {
-            this.activeBookings = statsResponse.activeBookings
-          } else {
-            console.warn('activeBookings missing from stats response:', statsResponse)
-            this.activeBookings = 0
-          }
+        // Update stats with defensive checks using the correct property names
+        this.totalSpots = stats.campingSpotCount || 0
+        this.activeBookings = stats.activeBookings || 0
+        this.totalRevenue = stats.revenue?.completed || 0
 
-          if (typeof statsResponse.totalRevenue !== 'undefined') {
-            this.totalRevenue = statsResponse.totalRevenue
-          } else {
-            console.warn('totalRevenue missing from stats response:', statsResponse)
-            this.totalRevenue = 0
-          }
-        }
-
-        // Update recent bookings with defensive checks
-        const bookings = Array.isArray(bookingsResponse) ? bookingsResponse : []
-        console.log('Raw bookings data:', bookings)
+        // Extract bookings from the nested response
+        const bookings = bookingsResponse?.data || []
+        console.log('Extracted bookings:', bookings)
         
         this.recentBookings = bookings.slice(0, 5).map(booking => {
           console.log('Processing booking:', booking)
@@ -140,7 +162,7 @@ export default {
             checkIn: booking?.startDate || booking?.checkIn ? new Date(booking.startDate || booking.checkIn).toLocaleDateString() : 'Unknown',
             checkOut: booking?.endDate || booking?.checkOut ? new Date(booking.endDate || booking.checkOut).toLocaleDateString() : 'Unknown',
             status: booking?.status || 'Unknown',
-            total: booking?.total || 0
+            total: booking?.totalPrice || booking?.total || 0  // Updated to use totalPrice
           }
         })
 
@@ -287,18 +309,99 @@ export default {
 }
 
 .booking-card {
-  padding: 1rem;
+  padding: 1.5rem;
   border: 1px solid #eee;
-  border-radius: 4px;
+  border-radius: 8px;
+  background: white;
 }
 
-.booking-card h4 {
-  margin: 0 0 0.5rem 0;
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.booking-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
   color: #2c3e50;
 }
 
-.booking-card p {
-  margin: 0.25rem 0;
-  color: #666;
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-badge.confirmed {
+  background: #e3fcef;
+  color: #42b983;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.status-badge.completed {
+  background: #e0f2fe;
+  color: #0ea5e9;
+}
+
+.booking-details {
+  color: #4b5563;
+}
+
+.booking-details p {
+  margin: 0.5rem 0;
+}
+
+.booking-details strong {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.btn-confirm,
+.btn-cancel {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-confirm {
+  background: #42b983;
+  color: white;
+  border: none;
+}
+
+.btn-confirm:hover {
+  background: #3aa876;
+}
+
+.btn-cancel {
+  background: white;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.btn-cancel:hover {
+  background: #fee2e2;
 }
 </style> 

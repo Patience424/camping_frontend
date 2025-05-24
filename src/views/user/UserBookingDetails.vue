@@ -11,7 +11,7 @@
   
   <script setup>
   import { ref } from 'vue';
-  import { createBooking } from '@/services/api';
+  import { bookingAPI } from '@/services/api';
   
   const campingSpotId = ref('');
   const startDate = ref('');
@@ -21,12 +21,12 @@
   
   async function submitBooking() {
     try {
-      await createBooking({
+      await bookingAPI.create({
         campingSpotId: campingSpotId.value,
         startDate: startDate.value,
         endDate: endDate.value,
         guestCount: guestCount.value,
-        specialRequests
+        specialRequests: specialRequests.value
       });
       alert('Booking successful!');
     } catch (err) {

@@ -106,7 +106,7 @@
             <div class="flex justify-between items-center mb-6">
               <h2 class="text-2xl font-semibold">Reviews</h2>
               <button 
-                v-if="isAuthenticated"
+                v-if="isAuthenticated && isUser"
                 @click="showReviewForm = true"
                 class="btn-primary"
               >
@@ -287,7 +287,7 @@
 
               <button 
                 type="submit"
-                class="w-full btn-primary"
+                class="btn-primary btn-block"
                 :disabled="isCheckingAvailability || !booking.startDate || !booking.endDate"
               >
                 {{ isCheckingAvailability ? 'Checking...' : 'Check Availability' }}
@@ -353,7 +353,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { campingSpotAPI } from '@/services/api'
+import { campingSpotAPI, bookingAPI, reviewAPI } from '@/services/api'
 
 export default {
   name: 'CampingSpotDetails',
@@ -405,7 +405,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'userId']),
+    ...mapGetters(['isAuthenticated', 'userId', 'isUser']),
     normalizedImages() {
       console.log('Raw spot images:', this.spot?.images)
       if (!this.spot || !this.spot.images) return []
@@ -512,9 +512,24 @@ export default {
         return
       }
 
+      if (!this.isUser) {
+        this.$store.commit('setNotification', {
+          type: 'error',
+          message: 'Only regular users can submit reviews'
+        })
+        return
+      }
+
       try {
         this.isSubmittingReview = true
-        await campingSpotAPI.createReview(this.spotId, {
+        console.log('Submitting review with data:', {
+          campingSpotId: this.spotId,
+          rating: this.review.rating,
+          comment: this.review.comment
+        })
+        
+        await reviewAPI.create({
+          campingSpotId: this.spotId,
           rating: this.review.rating,
           comment: this.review.comment
         })
@@ -529,9 +544,12 @@ export default {
         })
       } catch (error) {
         console.error('Error submitting review:', error)
+        console.error('Error response:', error.response)
+        console.error('Error status:', error.response?.status)
+        console.error('Error data:', error.response?.data)
         this.$store.commit('setNotification', {
           type: 'error',
-          message: 'Failed to submit review'
+          message: error.response?.data?.message || 'Failed to submit review'
         })
       } finally {
         this.isSubmittingReview = false
@@ -601,7 +619,8 @@ export default {
     async submitBooking() {
       try {
         this.isSubmittingBooking = true
-        await campingSpotAPI.createBooking(this.spotId, {
+        await bookingAPI.create({
+          campingSpotId: this.spotId,
           startDate: this.booking.startDate,
           endDate: this.booking.endDate,
           guestCount: this.booking.guestCount,
@@ -648,42 +667,111 @@ export default {
 
 <style scoped>
 .btn-primary {
-  background-color: var(--color-primary-600);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
+  transition: all 0.2s;
+  transform: translateZ(0);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-700);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.25), 0 3px 6px -1px rgba(37, 99, 235, 0.15);
+  transform: scale(1.02);
 }
 
 .btn-primary:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary-500);
-  box-shadow: 0 0 0 4px white;
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px white;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+  box-shadow: none;
 }
 
 .btn-secondary {
-  background-color: white;
-  color: var(--color-neutral-700);
   padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--color-neutral-300);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: white;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-neutral-50);
+  background-color: #f9fafb;
+  border-color: #d1d5db;
 }
 
 .btn-secondary:focus {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary-500);
-  box-shadow: 0 0 0 4px white;
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px white;
+}
+
+/* Modal button styles */
+.modal .btn-primary {
+  width: auto;
+}
+
+.modal .btn-secondary {
+  width: auto;
+}
+
+/* Availability status styles */
+.availability-status {
+  transition: all 0.3s ease-in-out;
+}
+
+.availability-status.available {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.availability-status.unavailable {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Booking calculation styles */
+.booking-calculation {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.booking-calculation-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.booking-calculation-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 1rem;
+}
+
+.btn-block {
+  width: 100%;
+  display: block;
 }
 </style>

@@ -66,26 +66,24 @@ export const campingSpotAPI = {
   search: (params) => api.get('/users/camping-spots/search', { params }),
   getCampingSpots: (params) => api.get('/users/camping-spots', { params }),
   checkAvailability: (id, data) => api.post(`/users/camping-spots/${id}/check-availability`, data),
-  createReview: (id, data) => api.post(`/users/camping-spots/${id}/reviews`, data),
+  createReview: (data) => api.post('/users/reviews', data),
   uploadImages: (id, formData) => api.post(`/users/camping-spots/${id}/images`, formData),
-  deleteImage: (id, imageId) => api.delete(`/users/camping-spots/${id}/images/${imageId}`),
-  createBooking: (id, data) => api.post(`/users/camping-spots/${id}/bookings`, data)
+  deleteImage: (id, imageId) => api.delete(`/users/camping-spots/${id}/images/${imageId}`)
 }
 
 export const bookingAPI = {
-  create: (data) => api.post('/bookings', data),
-  getAll: (params) => api.get('/bookings', { params }),
-  getById: (id) => api.get(`/bookings/${id}`),
-  update: (id, data) => api.put(`/bookings/${id}`, data),
-  cancel: (id) => api.post(`/bookings/${id}/cancel`)
+  create: (data) => api.post('/users/bookings', data),
+  getAll: (params) => api.get('/users/bookings', { params }),
+  getById: (id) => api.get(`/users/bookings/${id}`),
+  cancel: (bookingId) => api.put(`/users/bookings/${bookingId}/cancel`)
 }
 
 export const reviewAPI = {
-  create: (data) => api.post('/reviews', data),
-  getAll: (params) => api.get('/reviews', { params }),
-  getById: (id) => api.get(`/reviews/${id}`),
-  update: (id, data) => api.put(`/reviews/${id}`, data),
-  delete: (id) => api.delete(`/reviews/${id}`)
+  create: (data) => api.post('/users/reviews', data),
+  getAll: (params) => api.get('/users/reviews', { params }),
+  getById: (id) => api.get(`/users/reviews/${id}`),
+  update: (id, data) => api.put(`/users/reviews/${id}`, data),
+  delete: (id) => api.delete(`/users/reviews/${id}`)
 }
 
 export const adminAPI = {
@@ -114,13 +112,14 @@ export const ownerAPI = {
     }
   }),
   deleteCampingSpot: (id) => api.delete(`/owner/camping-spots/${id}`),
-  getBookings: () => api.get('/users/bookings'),
+  getBookings: () => api.get('/owner/bookings'),
   getReviews: () => api.get('/owner/reviews'),
   uploadImages: (id, formData) => api.post(`/owner/camping-spots/${id}/images`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
-  })
+  }),
+  updateBookingStatus: (bookingId, status) => api.put(`/owner/bookings/${bookingId}/status`, { status })
 }
 
 export default api 

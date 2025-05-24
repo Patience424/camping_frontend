@@ -182,9 +182,13 @@ export default {
       if (!this.validateForm()) return
       
       try {
-        console.log('Attempting login with credentials:', this.credentials)
+        console.log('Login: Attempting login with credentials:', this.credentials)
         const user = await this.$store.dispatch('login', this.credentials)
-        console.log('Login successful, user:', user)
+        console.log('Login: Login successful, user:', user)
+        console.log('Login: Store state after login:', {
+          token: this.$store.state.token,
+          user: this.$store.state.user
+        })
         
         // Redirect based on user role
         if (user.role === 'ADMIN') {

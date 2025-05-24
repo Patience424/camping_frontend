@@ -94,3 +94,16 @@ export default {
   }
 }
 </script>
+
+<style>
+/* Make notification popups wider and more readable */
+.fixed.bottom-6.right-6 {
+  min-width: 340px;
+  max-width: 480px;
+  padding: 1.5rem 2.25rem;
+  font-size: 1.1rem;
+  box-sizing: border-box;
+  border-radius: 14px;
+  word-break: break-word;
+}
+</style>
