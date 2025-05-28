@@ -40,7 +40,6 @@
           <ul class="space-y-2">
             <li><router-link to="/camping-spots" class="text-neutral-300 hover:text-white transition-colors">Camping Spots</router-link></li>
             <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Popular Destinations</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Last Minute Deals</a></li>
             <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Travel Guides</a></li>
             <li><router-link to="/camping-spots" class="text-neutral-300 hover:text-white transition-colors">Search</router-link></li>
           </ul>
@@ -51,10 +50,7 @@
           <h3 class="text-lg font-semibold mb-4">Host</h3>
           <ul class="space-y-2">
             <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">List Your Property</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Responsible Hosting</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Host Resources</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Community Forum</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Host Protection</a></li>
+
           </ul>
         </div>
 
@@ -63,10 +59,7 @@
           <h3 class="text-lg font-semibold mb-4">Support</h3>
           <ul class="space-y-2">
             <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Help Center</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Safety Information</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Cancellation Options</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Contact Us</a></li>
-            <li><a href="#" class="text-neutral-300 hover:text-white transition-colors">Trust & Safety</a></li>
+
           </ul>
         </div>
       </div>
@@ -77,7 +70,6 @@
           <div class="flex space-x-6">
             <a href="#" class="text-neutral-400 hover:text-white text-sm">Privacy</a>
             <a href="#" class="text-neutral-400 hover:text-white text-sm">Terms</a>
-            <a href="#" class="text-neutral-400 hover:text-white text-sm">Sitemap</a>
           </div>
         </div>
       </div>

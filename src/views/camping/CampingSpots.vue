@@ -103,207 +103,173 @@
     
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
-      <div class="md:flex">
-        <!-- Active Filters -->
-        <div v-if="hasActiveFilters" class="mb-6 w-full">
-          <div class="flex flex-wrap gap-2 items-center">
-            <span class="text-sm font-medium text-neutral-600">Active filters:</span>
-            
-            <button 
-              v-if="filters.location" 
-              @click="clearFilter('location')" 
-              class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
-            >
-              Location: {{ filters.location }}
-              <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            
-            <button 
-              v-if="filters.capacity" 
-              @click="clearFilter('capacity')" 
-              class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
-            >
-              Capacity: {{ filters.capacity }}+ people
-              <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            
-            <button 
-              v-if="filters.priceRange" 
-              @click="clearFilter('priceRange')" 
-              class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
-            >
-              Price: {{ formatPriceRange(filters.priceRange) }}
-              <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            
-            <button 
-              v-if="filters.appliedAmenities.length > 0" 
-              @click="clearFilter('selectedAmenities')" 
-              class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
-            >
-              {{ filters.appliedAmenities.length }} amenities selected
-              <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            
-            <button 
-              @click="clearAllFilters" 
-              class="text-neutral-600 text-xs hover:text-neutral-800 underline ml-2"
-            >
-              Clear all filters
-            </button>
-          </div>
-        </div>
-        
-        <!-- Map View Toggle -->
-        <div class="mb-6 flex justify-end w-full">
+      <!-- Active Filters -->
+      <div v-if="hasActiveFilters" class="mb-6 w-full">
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-sm font-medium text-neutral-600">Active filters:</span>
+          
           <button 
-            @click="toggleView" 
-            class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800"
+            v-if="filters.location" 
+            @click="clearFilter('location')" 
+            class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
           >
-            <svg v-if="showMapView" class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+            Location: {{ filters.location }}
+            <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
-            <svg v-else class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd" />
+          </button>
+          
+          <button 
+            v-if="filters.capacity" 
+            @click="clearFilter('capacity')" 
+            class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
+          >
+            Capacity: {{ filters.capacity }}+ people
+            <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
-            {{ showMapView ? 'Show List View' : 'Show Map View' }}
+          </button>
+          
+          <button 
+            v-if="filters.priceRange" 
+            @click="clearFilter('priceRange')" 
+            class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
+          >
+            Price: {{ formatPriceRange(filters.priceRange) }}
+            <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          
+          <button 
+            v-if="filters.appliedAmenities.length > 0" 
+            @click="clearFilter('selectedAmenities')" 
+            class="inline-flex items-center bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-xs"
+          >
+            {{ filters.appliedAmenities.length }} amenities selected
+            <svg class="h-3 w-3 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          
+          <button 
+            @click="clearAllFilters" 
+            class="text-neutral-600 text-xs hover:text-neutral-800 underline ml-2"
+          >
+            Clear all filters
           </button>
         </div>
       </div>
       
-      <!-- Map and List Views -->
-      <div class="md:flex md:space-x-8">
-        <!-- Camping Spots List -->
-        <div v-if="!showMapView || isMobile" class="md:w-full">
-          <div v-if="isLoading" class="flex justify-center py-20">
-            <svg class="animate-spin h-10 w-10 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-          
-          <div v-else-if="campingSpots.length === 0" class="text-center py-20">
-            <svg class="w-16 h-16 text-neutral-300 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 class="text-xl font-semibold mb-2">No camping spots found</h3>
-            <p class="text-neutral-600 mb-6">Try adjusting your filters to find more options</p>
-            <button @click="clearAllFilters" class="btn-primary">Clear all filters</button>
-          </div>
-          
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div 
-              v-for="spot in campingSpots" 
-              :key="spot.id" 
-              class="card group cursor-pointer hover:transform hover:scale-[1.02] transition-all duration-300"
-              @click="viewSpotDetails(spot.id)"
-            >
-              <div class="relative h-48 md:h-56 rounded-lg overflow-hidden mb-4">
-                <img 
-                  :src="getFirstImage(spot.images)" 
-                  :alt="spot.name" 
-                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  @error="handleImageError"
-                  loading="lazy"
-                >
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
-                  <div v-if="spot.averageRating" class="flex items-center bg-black/50 rounded-full px-2 py-1 w-fit">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span class="ml-1 text-xs">{{ spot.averageRating.toFixed(1) }}</span>
-                    <span class="ml-1 text-xs">({{ spot.reviewCount || 0 }})</span>
-                  </div>
-                </div>
-              </div>
-              <div class="p-2">
-                <h3 class="text-xl font-bold mb-2">{{ spot.name }}</h3>
-                <p class="text-neutral-600 mb-2 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+      <!-- Camping Spots List -->
+      <div class="w-full">
+        <div v-if="isLoading" class="flex justify-center py-20">
+          <svg class="animate-spin h-10 w-10 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        
+        <div v-else-if="campingSpots.length === 0" class="text-center py-20">
+          <svg class="w-16 h-16 text-neutral-300 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-xl font-semibold mb-2">No camping spots found</h3>
+          <p class="text-neutral-600 mb-6">Try adjusting your filters to find more options</p>
+          <button @click="clearAllFilters" class="btn-primary">Clear all filters</button>
+        </div>
+        
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div 
+            v-for="spot in campingSpots" 
+            :key="spot.id" 
+            class="card group cursor-pointer hover:transform hover:scale-[1.02] transition-all duration-300"
+            @click="viewSpotDetails(spot.id)"
+          >
+            <div class="relative h-48 md:h-56 rounded-lg overflow-hidden mb-4">
+              <img 
+                :src="getFirstImage(spot.images)" 
+                :alt="spot.name" 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                @error="handleImageError"
+                loading="lazy"
+              >
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
+                <div v-if="spot.averageRating" class="flex items-center bg-black/50 rounded-full px-2 py-1 w-fit">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  {{ spot.location }}
-                </p>
-                <p class="text-neutral-600 mb-4">{{ truncateDescription(spot.description, 100) }}</p>
-                <div class="flex justify-between items-center">
-                  <div>
-                    <span class="font-bold text-lg">{{ formatPrice(spot.pricePerNight) }}</span>
-                    <span class="text-neutral-600">/night</span>
-                  </div>
-                  <router-link :to="`/camping-spots/${spot.id}`" class="btn-primary">View Details</router-link>
+                  <span class="ml-1 text-xs">{{ spot.averageRating.toFixed(1) }}</span>
+                  <span class="ml-1 text-xs">({{ spot.reviewCount || 0 }})</span>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Pagination -->
-          <div v-if="pagination.pages > 1" class="mt-10 flex justify-center">
-            <div class="flex space-x-1">
-              <button 
-                @click="goToPage(pagination.page - 1)" 
-                :disabled="pagination.page === 1"
-                :class="[
-                  'px-3 py-1 rounded-md',
-                  pagination.page === 1 
-                    ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
-                    : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                ]"
-              >
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            <div class="p-2">
+              <h3 class="text-xl font-bold mb-2">{{ spot.name }}</h3>
+              <p class="text-neutral-600 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-neutral-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                 </svg>
-              </button>
-              
-              <button 
-                v-for="page in displayedPages" 
-                :key="page" 
-                @click="goToPage(page)"
-                :class="[
-                  'px-3 py-1 rounded-md',
-                  page === pagination.page 
-                    ? 'bg-primary-500 text-white' 
-                    : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                ]"
-              >
-                {{ page }}
-              </button>
-              
-              <button 
-                @click="goToPage(pagination.page + 1)" 
-                :disabled="pagination.page === pagination.pages"
-                :class="[
-                  'px-3 py-1 rounded-md',
-                  pagination.page === pagination.pages 
-                    ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
-                    : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                ]"
-              >
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                </svg>
-              </button>
+                {{ spot.location }}
+              </p>
+              <p class="text-neutral-600 mb-4">{{ truncateDescription(spot.description, 100) }}</p>
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="font-bold text-lg">{{ formatPrice(spot.pricePerNight) }}</span>
+                  <span class="text-neutral-600">/night</span>
+                </div>
+                <router-link :to="`/camping-spots/${spot.id}`" class="btn-primary">View Details</router-link>
+              </div>
             </div>
           </div>
         </div>
         
-        <!-- Map View (This would be implemented with a library like leaflet or google maps) -->
-        <div v-if="showMapView && !isMobile" class="w-full h-[800px] bg-neutral-100 rounded-xl relative overflow-hidden">
-          <div class="absolute inset-0 flex items-center justify-center text-neutral-500">
-            <div class="text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        <!-- Pagination -->
+        <div v-if="pagination.pages > 1" class="mt-10 flex justify-center">
+          <div class="flex space-x-1">
+            <button 
+              @click="goToPage(pagination.page - 1)" 
+              :disabled="pagination.page === 1"
+              :class="[
+                'px-3 py-1 rounded-md',
+                pagination.page === 1 
+                  ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
+                  : 'bg-white text-neutral-700 hover:bg-neutral-100'
+              ]"
+            >
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
-              <p class="text-xl font-semibold">Map View</p>
-              <p class="text-sm">(Interactive map would be implemented here)</p>
-            </div>
+            </button>
+            
+            <button 
+              v-for="page in displayedPages" 
+              :key="page" 
+              @click="goToPage(page)"
+              :class="[
+                'px-3 py-1 rounded-md',
+                page === pagination.page 
+                  ? 'bg-primary-500 text-white' 
+                  : 'bg-white text-neutral-700 hover:bg-neutral-100'
+              ]"
+            >
+              {{ page }}
+            </button>
+            
+            <button 
+              @click="goToPage(pagination.page + 1)" 
+              :disabled="pagination.page === pagination.pages"
+              :class="[
+                'px-3 py-1 rounded-md',
+                pagination.page === pagination.pages 
+                  ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
+                  : 'bg-white text-neutral-700 hover:bg-neutral-100'
+              ]"
+            >
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -335,7 +301,6 @@ export default {
       },
       isLoading: false,
       showAmenitiesDropdown: false,
-      showMapView: false,
       amenitiesList: [
         { id: 'WiFi', name: 'WiFi' },
         { id: 'Parking', name: 'Parking' },
@@ -427,14 +392,17 @@ export default {
         }
         
         const response = await campingSpotAPI.getCampingSpots(params)
-        console.log('Camping spots response:', response)
+        console.log('Camping spots API response:', response)
+        console.log('Camping spots data:', response.data)
+        console.log('First camping spot:', response.data?.[0])
+        console.log('First camping spot images:', response.data?.[0]?.images)
         
         this.campingSpots = response.data || []
-        this.pagination = response.pagination || {
-          page: 1,
-          limit: 9,
-          total: 0,
-          pages: 0
+        this.pagination = {
+          page: response.pagination?.page || 1,
+          limit: response.pagination?.limit || 9,
+          total: response.pagination?.total || 0,
+          pages: response.pagination?.pages || 0
         }
       } catch (error) {
         console.error('Error fetching camping spots:', error)
@@ -497,10 +465,6 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     },
     
-    toggleView() {
-      this.showMapView = !this.showMapView
-    },
-    
     viewSpotDetails(id) {
       this.$router.push(`/camping-spots/${id}`)
     },
@@ -508,41 +472,41 @@ export default {
     getFirstImage(images) {
       const defaultImage = 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
       
+      console.log('getFirstImage called with:', images)
+      console.log('images type:', typeof images)
+      console.log('is array:', Array.isArray(images))
+      
       try {
-        if (!images) return defaultImage
-        
-        // If images is a JSON string, parse it and get the first one
-        if (typeof images === 'string') {
-          try {
-            const parsedImages = JSON.parse(images)
-            if (Array.isArray(parsedImages) && parsedImages.length > 0) {
-              const firstImage = parsedImages[0]
-              // Check if the image URL is valid
-              if (this.isValidImageUrl(firstImage)) {
-                return firstImage
-              }
-            }
-          } catch (e) {
-            // If parsing fails, try using the string directly
-            if (this.isValidImageUrl(images)) {
-              return images
-            }
-          }
+        if (!images) {
+          console.log('No images provided, returning default')
+          return defaultImage
         }
         
-        // If images is already an array, get the first one
+        // If images is an array, get the first one
         if (Array.isArray(images) && images.length > 0) {
+          console.log('Images is an array, getting first image')
           const firstImage = images[0]
-          if (this.isValidImageUrl(firstImage)) {
-            return firstImage
+          console.log('First array image:', firstImage)
+          
+          // Check if firstImage is an object with a url property
+          if (firstImage && typeof firstImage === 'object' && firstImage.url) {
+            console.log('Found image object with URL:', firstImage.url)
+            return this.formatImageUrl(firstImage.url)
           }
         }
         
+        console.log('No valid image found, returning default')
         return defaultImage
       } catch (e) {
         console.error('Error parsing images:', e)
         return defaultImage
       }
+    },
+    
+    formatImageUrl(url) {
+      if (!url) return ''
+      if (url.startsWith('http')) return url
+      return `http://localhost:3000${url.startsWith('/') ? url : '/' + url}`
     },
     
     isValidImageUrl(url) {
@@ -555,7 +519,8 @@ export default {
         const urlObj = new URL(url)
         return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
       } catch (e) {
-        return false
+        // If URL parsing fails, it might be a relative path
+        return true
       }
     },
     
