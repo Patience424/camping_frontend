@@ -318,9 +318,11 @@
           <router-link to="/camping-spots" class="btn-accent px-8 py-3 text-lg font-semibold">
             Explore Camping Spots
           </router-link>
+          <!--
           <router-link to="/register" class="btn bg-white text-primary-500 hover:bg-neutral-100 px-8 py-3 text-lg font-semibold">
             Sign Up Now
           </router-link>
+          -->
         </div>
       </div>
     </section>
