@@ -1,5 +1,9 @@
+<!-- OwnerBookings.vue 
+This is a Vue.js component for managing bookings in an Owner dashboard of a camping booking application.
+It includes features for searching, filtering by status and date, viewing booking details, and updating booking statuses.
+-->
 <template>
-  <div class="admin-bookings">
+  <div class="owner-bookings">
     <div class="header">
       <h1>Bookings Management</h1>
       <div class="search-bar">
@@ -134,7 +138,7 @@
 
 <script>
 export default {
-  name: 'AdminBookings',
+  name: 'wnerBookings',
   data() {
     return {
       bookings: [],
@@ -241,7 +245,7 @@ export default {
 </script>
 
 <style scoped>
-.admin-bookings {
+.owner-bookings {
   padding: 2rem;
 }
 

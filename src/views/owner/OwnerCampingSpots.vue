@@ -1,10 +1,19 @@
+<!-- OwnerCampingSpots.vue 
+This is a Vue.js component for the owner camping spots management page of a camping booking application.
+It allows owners to view, add, edit, and delete their camping spots.
+-->
 <template>
   <div class="owner-camping-spots">
     <div class="header">
       <h1>My Camping Spots</h1>
-      <router-link to="/owner/camping-spots/new" class="btn-primary">
-        Add New Camping Spot
-      </router-link>
+      <div style="display: flex; gap: 1rem;">
+        <router-link to="/owner/camping-spots/new" class="btn-primary">
+          Add New Camping Spot
+        </router-link>
+        <router-link to="/owner/reviews" class="btn-primary">
+          View Reviews
+        </router-link>
+      </div>
     </div>
 
     <div class="spots-list">

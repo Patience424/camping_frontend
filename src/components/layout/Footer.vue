@@ -1,3 +1,8 @@
+<!-- Footer.vue 
+This is a Vue.js component for the footer of a camping booking application. 
+It includes company information, quick links, social media icons, and legal links. The design is responsive and uses Tailwind CSS for styling.
+It also includes a computed property to check if the user is authenticated, which can be used to conditionally render content in the footer.
+-->
 <template>
   <footer class="bg-neutral-800 text-white pt-12 pb-8">
     <div class="container mx-auto">

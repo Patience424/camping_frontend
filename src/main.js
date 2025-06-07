@@ -1,4 +1,5 @@
 // Main entry point for the Vue.js application
+// This file initializes the Vue instance, sets up global configurations, and registers plugins.
 
 import Vue from 'vue'
 import App from './App.vue'

@@ -1,3 +1,9 @@
+<!-- OwnerDashboard.vue 
+// This is a Vue.js component for the owner dashboard of a camping booking application.
+// It displays the owner's profile, key statistics, recent bookings, and allows managing booking statuses.
+// It includes features for confirming or cancelling bookings and provides a loading state while data is being fetched.
+// It also includes error handling for API calls and displays notifications for actions taken.
+-->
 <template>
   <div class="owner-dashboard">
     <div class="dashboard-header">

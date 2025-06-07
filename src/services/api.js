@@ -1,3 +1,5 @@
+// Description: API service for handling requests and responses in a Vue.js application
+
 import { api } from '@/plugins/axios'
 
 // Add request interceptor for logging
@@ -22,8 +24,10 @@ api.interceptors.response.use(
   response => {
     // Response is already transformed by the axios instance interceptor
     console.log('API Response:', {
-      data: response,
-      url: response?.request?.responseURL || 'unknown'
+      data: response.data,
+      url: response?.request?.responseURL || 'unknown',
+      status: response.status,
+      headers: response.headers
     })
     return response
   },

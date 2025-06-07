@@ -1,3 +1,9 @@
+<!-- CampingSpots.vue 
+This is a Vue.js component for the camping spots listing page of a camping booking application.
+It allows users to filter, search, and sort camping spots based on various criteria.
+It includes features for viewing spot details, active filters.  
+-->
+
 <template>
   <div class="min-h-screen bg-neutral-50">
     <!-- Filter Header -->
@@ -355,8 +361,18 @@ export default {
   },
   methods: {
     async fetchCampingSpots() {
+      console.log('fetchCampingSpots called')
       try {
         this.isLoading = true
+        console.log('Fetching camping spots with params:', {
+          page: this.pagination.page,
+          limit: this.pagination.limit,
+          location: this.filters.location,
+          capacity: this.filters.capacity,
+          priceRange: this.filters.priceRange,
+          amenities: this.filters.appliedAmenities,
+          sort: this.filters.sort
+        })
         
         // Build query parameters
         const params = {
@@ -391,11 +407,26 @@ export default {
           params.sortDir = direction
         }
         
+        console.log('Making API request with params:', params)
         const response = await campingSpotAPI.getCampingSpots(params)
         console.log('Camping spots API response:', response)
         console.log('Camping spots data:', response.data)
-        console.log('First camping spot:', response.data?.[0])
-        console.log('First camping spot images:', response.data?.[0]?.images)
+        
+        // Add detailed logging for the first camping spot's images
+        if (response.data && response.data.length > 0) {
+          const firstSpot = response.data[0]
+          console.log('First camping spot:', firstSpot)
+          console.log('First camping spot images:', firstSpot.images)
+          console.log('First camping spot images type:', typeof firstSpot.images)
+          console.log('First camping spot images is array:', Array.isArray(firstSpot.images))
+          if (Array.isArray(firstSpot.images) && firstSpot.images.length > 0) {
+            console.log('First image in array:', firstSpot.images[0])
+            console.log('First image type:', typeof firstSpot.images[0])
+            if (typeof firstSpot.images[0] === 'object') {
+              console.log('First image object keys:', Object.keys(firstSpot.images[0]))
+            }
+          }
+        }
         
         this.campingSpots = response.data || []
         this.pagination = {
@@ -406,6 +437,12 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching camping spots:', error)
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response,
+          status: error.response?.status,
+          data: error.response?.data
+        })
         this.$store.commit('setNotification', {
           type: 'error',
           message: 'Failed to load camping spots'
@@ -487,11 +524,25 @@ export default {
           console.log('Images is an array, getting first image')
           const firstImage = images[0]
           console.log('First array image:', firstImage)
+          console.log('First image type:', typeof firstImage)
           
           // Check if firstImage is an object with a url property
-          if (firstImage && typeof firstImage === 'object' && firstImage.url) {
-            console.log('Found image object with URL:', firstImage.url)
-            return this.formatImageUrl(firstImage.url)
+          if (firstImage && typeof firstImage === 'object') {
+            console.log('First image is an object, keys:', Object.keys(firstImage))
+            if (firstImage.url) {
+              console.log('Found image object with URL:', firstImage.url)
+              const formattedUrl = this.formatImageUrl(firstImage.url)
+              console.log('Formatted URL:', formattedUrl)
+              return formattedUrl
+            }
+          }
+          
+          // If firstImage is a string
+          if (typeof firstImage === 'string') {
+            console.log('First image is a string:', firstImage)
+            const formattedUrl = this.formatImageUrl(firstImage)
+            console.log('Formatted URL:', formattedUrl)
+            return formattedUrl
           }
         }
         
@@ -504,9 +555,18 @@ export default {
     },
     
     formatImageUrl(url) {
-      if (!url) return ''
-      if (url.startsWith('http')) return url
-      return `http://localhost:3000${url.startsWith('/') ? url : '/' + url}`
+      console.log('formatImageUrl called with:', url)
+      if (!url) {
+        console.log('No URL provided')
+        return ''
+      }
+      if (url.startsWith('http')) {
+        console.log('URL is already absolute:', url)
+        return url
+      }
+      const formattedUrl = `http://localhost:3000${url.startsWith('/') ? url : '/' + url}`
+      console.log('Formatted relative URL:', formattedUrl)
+      return formattedUrl
     },
     
     isValidImageUrl(url) {
@@ -597,9 +657,13 @@ export default {
       }
     }
   },
-  mounted() {
-    this.applyQueryParams()
+  created() {
+    console.log('CampingSpots component created')
     this.fetchCampingSpots()
+  },
+  mounted() {
+    console.log('CampingSpots component mounted')
+    this.applyQueryParams()
     this.checkIfMobile()
     window.addEventListener('resize', this.checkIfMobile)
     

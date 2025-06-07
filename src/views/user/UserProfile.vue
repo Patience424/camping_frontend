@@ -1,3 +1,8 @@
+<!-- UserProfile.vue 
+This is a Vue.js component for the user profile page of a camping booking application.
+It allows users to view and update their profile information, change their password, and delete their account. 
+-->
+
 <template>
   <div class="min-h-screen bg-neutral-50 py-8">
     <div class="container mx-auto px-4">

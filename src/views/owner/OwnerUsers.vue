@@ -1,3 +1,7 @@
+<!-- AdminUsers.vue 
+This is a Vue.js component for the admin user management page of a camping booking application.
+It allows administrators to view, search, filter, and manage users, including editing roles and statuses.
+-->
 <template>
   <div class="admin-users">
     <div class="header">

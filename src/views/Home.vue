@@ -1,3 +1,10 @@
+<!-- Home.vue
+This is a Vue.js component for the home page of a camping booking application.
+It features a hero section with a background image, a search box for finding camping spots, a section for featured camping spots, 
+and sections highlighting the benefits of using the service and testimonials from users.
+// It also includes a section for why users should choose this service and a testimonials section.
+// It uses Tailwind CSS for styling and includes responsive design elements.
+-->
 <template>
   <div>
     <!-- Hero Section -->

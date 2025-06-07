@@ -1,3 +1,8 @@
+<!-- Navbar.vue
+This is a Vue.js component for the navigation bar of a camping booking application.
+It includes a logo, navigation links, user menu with profile and logout options, and responsive design for mobile devices.
+-->
+
 <template>
   <nav class="bg-white shadow-md sticky top-0 z-50">
     <div class="container mx-auto px-4">

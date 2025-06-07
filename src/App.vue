@@ -1,3 +1,11 @@
+<!-- App.vue
+This is the main Vue.js application component for a camping booking application.
+It includes the main layout with a navigation bar, footer, and global notification system.
+It also handles global loading states and displays notifications for success, error, and info messages.
+It uses Vue Router for navigation and Vuex for state management. 
+-->
+
+
 <template>
   <div id="app" class="min-h-screen flex flex-col">
     <AppNavbar />

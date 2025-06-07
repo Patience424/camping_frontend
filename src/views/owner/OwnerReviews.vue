@@ -1,5 +1,10 @@
+<!-- OwnerReviews.vue 
+This is a Vue.js component for the owner reviews management page of a camping booking application.
+// It allows administrators to view, search, filter, and manage user reviews for camping spots.
+// It includes features for approving, rejecting, and deleting reviews, as well as displaying user and camping spot information. 
+-->
 <template>
-  <div class="admin-reviews">
+  <div class="owner-reviews">
     <div class="header">
       <h1>Reviews Management</h1>
       <div class="search-bar">
@@ -21,11 +26,11 @@
         <option value="2">2 Stars</option>
         <option value="1">1 Star</option>
       </select>
-      <select v-model="statusFilter" @change="handleFilter">
-        <option value="">All Status</option>
-        <option value="published">Published</option>
-        <option value="pending">Pending</option>
-        <option value="rejected">Rejected</option>
+      <select v-model="campingSpotFilter" @change="handleFilter">
+        <option value="">All Camping Spots</option>
+        <option v-for="spot in uniqueCampingSpots" :key="spot.id" :value="spot.id">
+          {{ spot.name }}
+        </option>
       </select>
     </div>
 
@@ -33,8 +38,9 @@
       <div v-for="review in filteredReviews" :key="review.id" class="review-card">
         <div class="review-header">
           <div class="user-info">
-            <h3>{{ review.userName }}</h3>
-            <p class="camping-spot">{{ review.spotName }}</p>
+            <h3>{{ review.user?.name }}</h3>
+            <p class="camping-spot">{{ review.campingSpot?.name }}</p>
+            <p class="location">{{ review.campingSpot?.location }}</p>
           </div>
           <div class="review-meta">
             <div class="rating">
@@ -42,40 +48,17 @@
                 {{ i <= review.rating ? '★' : '☆' }}
               </span>
             </div>
-            <span class="date">{{ review.date }}</span>
+            <span class="date">{{ formatDate(review.createdAt) }}</span>
           </div>
         </div>
 
         <div class="review-content">
-          <p>{{ review.content }}</p>
-          <div v-if="review.response" class="owner-response">
-            <strong>Owner Response:</strong>
-            <p>{{ review.response }}</p>
-          </div>
+          <p>{{ review.comment }}</p>
         </div>
 
         <div class="review-footer">
-          <span class="status-badge" :class="review.status.toLowerCase()">
-            {{ review.status }}
-          </span>
           <div class="actions">
-            <button 
-              v-if="review.status === 'Pending'"
-              @click="updateStatus(review, 'Published')" 
-              class="btn-approve"
-            >
-              Approve
-            </button>
-            <button 
-              v-if="review.status === 'Pending'"
-              @click="updateStatus(review, 'Rejected')" 
-              class="btn-reject"
-            >
-              Reject
-            </button>
-            <button @click="deleteReview(review)" class="btn-delete">
-              Delete
-            </button>
+            <!-- Delete button removed -->
           </div>
         </div>
       </div>
@@ -84,68 +67,62 @@
 </template>
 
 <script>
+import { ownerAPI } from '@/services/api'
+
 export default {
-  name: 'AdminReviews',
+  name: 'OwnerReviews',
   data() {
     return {
       reviews: [],
       searchQuery: '',
       ratingFilter: '',
-      statusFilter: ''
+      campingSpotFilter: ''
     }
   },
   computed: {
+    uniqueCampingSpots() {
+      const spots = [];
+      const seen = new Set();
+      for (const review of this.reviews) {
+        const spot = review.campingSpot;
+        if (spot && !seen.has(spot.id)) {
+          spots.push({ id: spot.id, name: spot.name });
+          seen.add(spot.id);
+        }
+      }
+      return spots;
+    },
     filteredReviews() {
       return this.reviews.filter(review => {
-        const matchesSearch = 
-          review.userName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          review.spotName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          review.content.toLowerCase().includes(this.searchQuery.toLowerCase())
-        
-        const matchesRating = !this.ratingFilter || 
-          review.rating === parseInt(this.ratingFilter)
-        
-        const matchesStatus = !this.statusFilter || 
-          review.status.toLowerCase() === this.statusFilter
+        const matchesSearch =
+          (review.user?.name?.toLowerCase() || '').includes(this.searchQuery.toLowerCase()) ||
+          (review.campingSpot?.name?.toLowerCase() || '').includes(this.searchQuery.toLowerCase()) ||
+          (review.comment?.toLowerCase() || '').includes(this.searchQuery.toLowerCase());
 
-        return matchesSearch && matchesRating && matchesStatus
-      })
-    }
+        const matchesRating = !this.ratingFilter ||
+          review.rating === parseInt(this.ratingFilter);
+
+        const matchesCampingSpot = !this.campingSpotFilter ||
+          (review.campingSpot && String(review.campingSpot.id) === String(this.campingSpotFilter));
+
+        return matchesSearch && matchesRating && matchesCampingSpot;
+      });
+    },
   },
   async created() {
-    // TODO: Fetch reviews from API
-    this.reviews = [
-      {
-        id: 1,
-        userName: 'John Doe',
-        spotName: 'Mountain View Camp',
-        rating: 5,
-        content: 'Amazing experience! The views were breathtaking and the facilities were clean and well-maintained.',
-        date: '2024-03-01',
-        status: 'Published',
-        response: 'Thank you for your wonderful review! We\'re glad you enjoyed your stay.'
-      },
-      {
-        id: 2,
-        userName: 'Jane Smith',
-        spotName: 'Lakeside Retreat',
-        rating: 4,
-        content: 'Great location and friendly staff. Could use more amenities.',
-        date: '2024-03-05',
-        status: 'Pending',
-        response: null
-      },
-      {
-        id: 3,
-        userName: 'Mike Johnson',
-        spotName: 'Forest Haven',
-        rating: 2,
-        content: 'Disappointing experience. The site was not as described and quite dirty.',
-        date: '2024-03-10',
-        status: 'Pending',
-        response: null
-      }
-    ]
+    try {
+      // Fetch reviews from API
+      const response = await ownerAPI.getReviews();
+      this.reviews = Array.isArray(response.data) ? response.data : [];
+      console.log('Fetched reviews:', this.reviews);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      this.$store?.commit?.('setNotification', {
+        type: 'error',
+        message: 'Failed to load reviews'
+      });
+      this.reviews = [];
+    }
   },
   methods: {
     handleSearch() {
@@ -171,13 +148,23 @@ export default {
           console.error('Error deleting review:', error)
         }
       }
-    }
+    },
+    getStatusClass(status) {
+      return (status && typeof status === 'string') ? status.toLowerCase() : '';
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    },
   }
 }
 </script>
 
 <style scoped>
-.admin-reviews {
+.owner-reviews {
   padding: 2rem;
 }
 
@@ -233,6 +220,12 @@ export default {
 }
 
 .camping-spot {
+  color: #666;
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+}
+
+.location {
   color: #666;
   margin: 0.25rem 0 0 0;
   font-size: 0.875rem;

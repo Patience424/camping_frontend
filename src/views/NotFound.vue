@@ -1,3 +1,8 @@
+<!-- NotFound.vue 
+This is a Vue.js component for the 404 Not Found page of a camping booking application.
+It provides a user-friendly message and options to navigate back to the home page or explore camping spots.
+-->
+
 <template>
   <div class="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
     <div class="text-center max-w-md">

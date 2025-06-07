@@ -1,3 +1,9 @@
+<!-- UserReviews.vue 
+This is a Vue.js component for the user reviews page of a camping booking application.
+It allows users to view, edit, and delete their reviews for camping spots.
+It includes features for displaying reviews, editing them in a modal, and deleting them with confirmation.
+It also handles loading states, error handling, and responsive design for better user experience.
+-->
 <template>
   <div class="min-h-screen bg-neutral-50 py-8">
     <div class="container mx-auto px-4">
@@ -182,6 +188,8 @@
 </template>
 
 <script>
+import reviewAPI from '../../services/reviewAPI'
+
 export default {
   name: 'UserReviews',
   data() {
@@ -203,13 +211,14 @@ export default {
     async fetchReviews() {
       try {
         this.isLoading = true
-        const response = await this.$axios.get('/reviews/my-reviews')
-        this.reviews = response.data
+        const response = await reviewAPI.getAll()
+        this.reviews = Array.isArray(response.data) ? response.data : []
       } catch (error) {
         this.$store.commit('setNotification', {
           type: 'error',
           message: 'Failed to load reviews'
         })
+        this.reviews = [] // fallback on error
       } finally {
         this.isLoading = false
       }
@@ -234,7 +243,7 @@ export default {
           return
         }
         
-        await this.$axios.put(`/reviews/${this.editedReview.id}`, {
+        await reviewAPI.update(this.editedReview.id, {
           rating: this.editedReview.rating,
           comment: this.editedReview.comment
         })
@@ -266,7 +275,7 @@ export default {
         if (!confirm('Are you sure you want to delete this review?')) return
         
         this.isDeleting = id
-        await this.$axios.delete(`/reviews/${id}`)
+        await reviewAPI.delete(id)
         
         // Remove review from list
         this.reviews = this.reviews.filter(r => r.id !== id)
@@ -286,25 +295,32 @@ export default {
     },
     
     getFirstImage(images) {
-      try {
-        if (!images) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
-        
-        if (typeof images === 'string') {
-          const parsedImages = JSON.parse(images)
-          if (Array.isArray(parsedImages) && parsedImages.length > 0) {
-            return parsedImages[0]
+      const backendUrl = 'http://localhost:3000';
+      if (!images) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600';
+
+      if (typeof images === 'string') {
+        try {
+          const parsed = JSON.parse(images);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            let img = parsed[0];
+            if (typeof img === 'object' && img.url) img = img.url;
+            if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`;
+            return img;
           }
-          return images
+        } catch (e) {
+          if (images.startsWith('http')) return images;
+          return `${backendUrl}/${images.replace(/^\/?/, '')}`;
         }
-        
-        if (Array.isArray(images) && images.length > 0) {
-          return images[0]
-        }
-        
-        return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
-      } catch (e) {
-        return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
       }
+
+      if (Array.isArray(images) && images.length > 0) {
+        let img = images[0];
+        if (typeof img === 'object' && img.url) img = img.url;
+        if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`;
+        return img;
+      }
+
+      return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600';
     },
     
     formatDate(date) {

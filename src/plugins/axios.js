@@ -1,3 +1,8 @@
+// Axios plugin for Vue.js
+// This plugin sets up axios with interceptors for request and response handling,
+// including error handling, token management, and user notifications.
+// It also provides a base URL for API calls and integrates with Vuex for state management.
+
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'

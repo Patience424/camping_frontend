@@ -1,3 +1,8 @@
+<!-- UserBookings.vue 
+This is a Vue.js component for the user bookings page of a camping booking application.
+It allows users to view their bookings, cancel them, and see details such as check-in/check-out dates, guest count, and special requests.  
+It includes loading states, error handling, and responsive design for better user experience. 
+-->
 <template>
   <div class="bookings-page">
     <h2>Your Bookings</h2>

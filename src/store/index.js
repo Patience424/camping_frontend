@@ -1,3 +1,7 @@
+// Store configuration for Vuex in a Vue.js application
+// This file sets up the Vuex store, defines state, getters, mutations, and actions
+// for managing authentication, user profiles, notifications, and loading states.
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { api } from '@/plugins/axios'

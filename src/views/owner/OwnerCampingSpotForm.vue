@@ -1,3 +1,8 @@
+<!-- OwnerCampingSpotForm.vue 
+This is a Vue.js component for the owner camping spot form in a camping booking application.
+It allows owners to create or edit camping spots, including details like name, location, description, price, capacity, images, and amenities.
+It includes form validation, image upload handling, and integrates with the owner API for data submission.
+--> 
 <template>
   <div class="camping-spot-form">
     <h1>{{ isEdit ? 'Edit Camping Spot' : 'Add New Camping Spot' }}</h1>

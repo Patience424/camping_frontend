@@ -18,11 +18,9 @@ import UserReviews from '@/views/user/UserReviews.vue'
 import OwnerDashboard from '@/views/owner/OwnerDashboard.vue'
 import OwnerCampingSpots from '@/views/owner/OwnerCampingSpots.vue'
 import OwnerCampingSpotForm from '@/views/owner/OwnerCampingSpotForm.vue'
-import AdminDashboard from '@/views/admin/AdminDashboard.vue'
-import AdminUsers from '@/views/admin/AdminUsers.vue'
-import AdminCampingSpots from '@/views/admin/AdminCampingSpots.vue'
-import AdminBookings from '@/views/admin/AdminBookings.vue'
-import AdminReviews from '@/views/admin/AdminReviews.vue'
+import OwnerUsers from '@/views/owner/OwnerUsers.vue'
+import OwnerBookings from '@/views/owner/OwnerBookings.vue'
+import OwnerReviews from '@/views/owner/OwnerReviews.vue'
 import NotFound from '@/views/NotFound.vue'
 
 const routes = [
@@ -116,36 +114,25 @@ const routes = [
     meta: { requiresAuth: true, ownerOnly: true }
   },
   
-  // Admin routes
+  // Admin routes removed
+  
   {
-    path: '/admin/dashboard',
-    name: 'AdminDashboard',
-    component: AdminDashboard,
-    meta: { requiresAuth: true, adminOnly: true }
+    path: '/owner/users',
+    name: 'OwnerUsers',
+    component: OwnerUsers,
+    meta: { requiresAuth: true, ownerOnly: true }
   },
   {
-    path: '/admin/users',
-    name: 'AdminUsers',
-    component: AdminUsers,
-    meta: { requiresAuth: true, adminOnly: true }
+    path: '/owner/bookings',
+    name: 'OwnerBookings',
+    component: OwnerBookings,
+    meta: { requiresAuth: true, ownerOnly: true }
   },
   {
-    path: '/admin/camping-spots',
-    name: 'AdminCampingSpots',
-    component: AdminCampingSpots,
-    meta: { requiresAuth: true, adminOnly: true }
-  },
-  {
-    path: '/admin/bookings',
-    name: 'AdminBookings',
-    component: AdminBookings,
-    meta: { requiresAuth: true, adminOnly: true }
-  },
-  {
-    path: '/admin/reviews',
-    name: 'AdminReviews',
-    component: AdminReviews,
-    meta: { requiresAuth: true, adminOnly: true }
+    path: '/owner/reviews',
+    name: 'OwnerReviews',
+    component: OwnerReviews,
+    meta: { requiresAuth: true, OwnerOnly: true }
   },
   
   // 404 Not Found
@@ -175,7 +162,6 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const guestOnly = to.matched.some(record => record.meta.guestOnly)
   const ownerOnly = to.matched.some(record => record.meta.ownerOnly)
-  const adminOnly = to.matched.some(record => record.meta.adminOnly)
   
   // Check authentication status
   const isAuthenticated = await store.dispatch('checkAuth')
@@ -186,8 +172,6 @@ router.beforeEach(async (to, from, next) => {
   } else if (guestOnly && isAuthenticated) {
     next('/')
   } else if (ownerOnly && (!isAuthenticated || !store.getters.isOwner)) {
-    next('/')
-  } else if (adminOnly && (!isAuthenticated || !store.getters.isAdmin)) {
     next('/')
   } else {
     next()
