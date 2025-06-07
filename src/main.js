@@ -1,3 +1,5 @@
+// Main entry point for the Vue.js application
+
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
