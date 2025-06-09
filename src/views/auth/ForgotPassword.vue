@@ -1,3 +1,7 @@
+<!-- ForgotPassword.vue 
+can be used to request a password reset link via email 
+-> will be implimented later 
+-->
 <template>
   <div class="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center">
     <div class="max-w-md w-full mx-auto space-y-8">

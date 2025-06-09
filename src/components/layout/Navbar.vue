@@ -23,7 +23,6 @@ It includes a logo, navigation links, user menu with profile and logout options,
           <router-link to="/" class="px-3 py-2 text-neutral-600 hover:text-primary-500" exact>Home</router-link>
           <router-link to="/camping-spots" class="px-3 py-2 text-neutral-600 hover:text-primary-500">Explore</router-link>
           <router-link v-if="isOwner" to="/owner/camping-spots" class="px-3 py-2 text-neutral-600 hover:text-primary-500">My Listings</router-link>
-          <router-link v-if="isAdmin" to="/admin/dashboard" class="px-3 py-2 text-neutral-600 hover:text-primary-500">Admin</router-link>
         </div>
 
         <!-- User Menu -->
@@ -59,7 +58,6 @@ It includes a logo, navigation links, user menu with profile and logout options,
                   <router-link to="/bookings" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100" role="menuitem">Your Bookings</router-link>
                   <router-link to="/reviews" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100" role="menuitem">Your Reviews</router-link>
                   <router-link v-if="isOwner" to="/owner/dashboard" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100" role="menuitem">Owner Dashboard</router-link>
-                  <router-link v-if="isAdmin" to="/admin/dashboard" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100" role="menuitem">Admin Dashboard</router-link>
                   <a href="#" @click.prevent="logout" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100" role="menuitem">Sign out</a>
                 </div>
               </div>
@@ -102,7 +100,6 @@ It includes a logo, navigation links, user menu with profile and logout options,
           <router-link v-if="isAuthenticated" to="/profile" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-neutral-100" :class="[$route.path === '/profile' ? 'text-primary-500' : 'text-neutral-600']">Profile</router-link>
           <router-link v-if="isAuthenticated" to="/bookings" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-neutral-100" :class="[$route.path.includes('/bookings') ? 'text-primary-500' : 'text-neutral-600']">Bookings</router-link>
           <router-link v-if="isOwner" to="/owner/dashboard" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-neutral-100" :class="[$route.path.includes('/owner') ? 'text-primary-500' : 'text-neutral-600']">Owner Dashboard</router-link>
-          <router-link v-if="isAdmin" to="/admin/dashboard" class="block px-3 py-2 rounded-md text-base font-medium hover:bg-neutral-100" :class="[$route.path.includes('/admin') ? 'text-primary-500' : 'text-neutral-600']">Admin Dashboard</router-link>
           <a v-if="isAuthenticated" href="#" @click.prevent="logout" class="block px-3 py-2 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-100">Sign out</a>
           <router-link v-else to="/login" class="block px-3 py-2 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-100">Log in</router-link>
           <router-link v-if="!isAuthenticated" to="/register" class="block px-3 py-2 rounded-md text-base font-medium text-neutral-600 hover:bg-neutral-100">Sign up</router-link>
@@ -124,7 +121,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'isUser', 'isOwner', 'isAdmin']),
+    ...mapGetters(['isAuthenticated', 'isUser', 'isOwner']),
     ...mapState({
       user: state => state.user
     })

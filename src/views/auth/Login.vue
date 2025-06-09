@@ -9,7 +9,7 @@
       </div>
       
       <div class="bg-white py-8 px-4 shadow-md sm:rounded-lg sm:px-10">
-        <form class="space-y-6" @submit.prevent="login">
+        <form class="space-y-7" @submit.prevent="login">
           <div>
             <label for="email" class="form-label">Email address</label>
             <input 
@@ -52,19 +52,6 @@
             <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
           </div>
           
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <input
-                id="remember-me"
-                v-model="rememberMe"
-                type="checkbox"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
-              >
-              <label for="remember-me" class="ml-2 block text-sm text-neutral-600">
-                Remember me
-              </label>
-            </div>
-          </div>
           
           <div>
             <button 
@@ -109,13 +96,22 @@ export default {
         password: ''
       },
       showPassword: false,
-      rememberMe: false,
       errors: {
         email: '',
         password: ''
       }
     }
   },
+    /* 
+  computed: {
+  isLoading() {
+    return this.$store.state.isLoading
+  },
+  user() {
+    return this.$store.state.user
+  }
+}
+*/
   computed: {
     ...mapState({
       isLoading: state => state.isLoading
@@ -158,9 +154,7 @@ export default {
         })
         
         // Redirect based on user role
-        if (user.role === 'ADMIN') {
-          this.$router.push('/admin/dashboard')
-        } else if (user.role === 'OWNER') {
+        if (user.role === 'OWNER') {
           this.$router.push('/owner/dashboard')
         } else {
           // Get the redirect URL from query parameters or go to the home page

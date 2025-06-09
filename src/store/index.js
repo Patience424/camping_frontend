@@ -21,7 +21,7 @@ export default new Vuex.Store({
     isAuthenticated: state => !!state.token,
     isUser: state => state.user && state.user.role === 'USER',
     isOwner: state => state.user && state.user.role === 'OWNER',
-    isAdmin: state => state.user && state.user.role === 'ADMIN',
+    //isAdmin: state => state.user && state.user.role === 'ADMIN',
     userRole: state => state.user ? state.user.role : null,
     userId: state => state.user ? state.user.id : null
   },
@@ -48,7 +48,7 @@ export default new Vuex.Store({
         if (state.notification === notification) {
           state.notification = null
         }
-      }, 5000)
+      }, 7000)
     },
     clearNotification(state) {
       state.notification = null

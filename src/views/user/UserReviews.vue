@@ -188,7 +188,7 @@ It also handles loading states, error handling, and responsive design for better
 </template>
 
 <script>
-import reviewAPI from '../../services/reviewAPI'
+import { reviewAPI } from '@/services/api' // ✅ updated import
 
 export default {
   name: 'UserReviews',
@@ -212,18 +212,18 @@ export default {
       try {
         this.isLoading = true
         const response = await reviewAPI.getAll()
-        this.reviews = Array.isArray(response.data) ? response.data : []
+        this.reviews = Array.isArray(response) ? response : []
       } catch (error) {
         this.$store.commit('setNotification', {
           type: 'error',
           message: 'Failed to load reviews'
         })
-        this.reviews = [] // fallback on error
+        this.reviews = []
       } finally {
         this.isLoading = false
       }
     },
-    
+
     editReview(review) {
       this.editedReview = {
         id: review.id,
@@ -232,23 +232,22 @@ export default {
       }
       this.showEditModal = true
     },
-    
+
     async updateReview() {
       try {
         this.isUpdating = true
         this.error = ''
-        
+
         if (!this.editedReview.comment) {
           this.error = 'Please enter a comment'
           return
         }
-        
+
         await reviewAPI.update(this.editedReview.id, {
           rating: this.editedReview.rating,
           comment: this.editedReview.comment
         })
-        
-        // Update review in the list
+
         const index = this.reviews.findIndex(r => r.id === this.editedReview.id)
         if (index !== -1) {
           this.reviews[index] = {
@@ -257,7 +256,7 @@ export default {
             comment: this.editedReview.comment
           }
         }
-        
+
         this.showEditModal = false
         this.$store.commit('setNotification', {
           type: 'success',
@@ -269,17 +268,16 @@ export default {
         this.isUpdating = false
       }
     },
-    
+
     async deleteReview(id) {
       try {
         if (!confirm('Are you sure you want to delete this review?')) return
-        
+
         this.isDeleting = id
         await reviewAPI.delete(id)
-        
-        // Remove review from list
+
         this.reviews = this.reviews.filter(r => r.id !== id)
-        
+
         this.$store.commit('setNotification', {
           type: 'success',
           message: 'Review deleted successfully'
@@ -293,36 +291,36 @@ export default {
         this.isDeleting = null
       }
     },
-    
+
     getFirstImage(images) {
-      const backendUrl = 'http://localhost:3000';
-      if (!images) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600';
+      const backendUrl = 'http://localhost:3000'
+      if (!images) return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
 
       if (typeof images === 'string') {
         try {
-          const parsed = JSON.parse(images);
+          const parsed = JSON.parse(images)
           if (Array.isArray(parsed) && parsed.length > 0) {
-            let img = parsed[0];
-            if (typeof img === 'object' && img.url) img = img.url;
-            if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`;
-            return img;
+            let img = parsed[0]
+            if (typeof img === 'object' && img.url) img = img.url
+            if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`
+            return img
           }
         } catch (e) {
-          if (images.startsWith('http')) return images;
-          return `${backendUrl}/${images.replace(/^\/?/, '')}`;
+          if (images.startsWith('http')) return images
+          return `${backendUrl}/${images.replace(/^\/?/, '')}`
         }
       }
 
       if (Array.isArray(images) && images.length > 0) {
-        let img = images[0];
-        if (typeof img === 'object' && img.url) img = img.url;
-        if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`;
-        return img;
+        let img = images[0]
+        if (typeof img === 'object' && img.url) img = img.url
+        if (img && !img.startsWith('http')) return `${backendUrl}/${img.replace(/^\/?/, '')}`
+        return img
       }
 
-      return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600';
+      return 'https://images.pexels.com/photos/6271625/pexels-photo-6271625.jpeg?auto=compress&cs=tinysrgb&w=1600'
     },
-    
+
     formatDate(date) {
       return new Date(date).toLocaleDateString('en-US', {
         month: 'long',

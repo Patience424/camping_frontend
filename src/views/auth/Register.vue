@@ -199,6 +199,16 @@ export default {
       }
     }
   },
+  /* 
+  computed: {
+  isLoading() {
+    return this.$store.state.isLoading
+  },
+  user() {
+    return this.$store.state.user
+  }
+}
+*/
   computed: {
     ...mapState({
       isLoading: state => state.isLoading

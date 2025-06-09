@@ -1,46 +1,87 @@
-// Description: API service for handling requests and responses in a Vue.js application
+// Description: Unified API service for handling all HTTP requests in a Vue.js application
 
-import { api } from '@/plugins/axios'
+import axios from 'axios'
+import store from '@/store'
+import router from '@/router'
 
-// Add request interceptor for logging
+// Create Axios instance
+const api = axios.create({
+  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8080/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+// Request interceptor
 api.interceptors.request.use(
   config => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
+    // Optional: Add Vuex loading indicator
+    store.commit('setLoading', true)
+
     console.log('API Request:', {
       method: config.method,
       url: config.url,
       params: config.params,
       data: config.data
     })
+
     return config
   },
   error => {
+    store.commit('setLoading', false)
     console.error('API Request Error:', error)
     return Promise.reject(error)
   }
 )
 
-// Add response interceptor for logging
+// Response interceptor
 api.interceptors.response.use(
   response => {
-    // Response is already transformed by the axios instance interceptor
+    store.commit('setLoading', false)
+
     console.log('API Response:', {
       data: response.data,
       url: response?.request?.responseURL || 'unknown',
       status: response.status,
       headers: response.headers
     })
-    return response
+
+    if (!response.data) {
+      return Promise.reject(new Error('No data received from server'))
+    }
+
+    return response.data
   },
   error => {
+    store.commit('setLoading', false)
+
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
       url: error.config?.url || 'unknown'
     })
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      store.dispatch('logout')
+      router.push('/login')
+      store.commit('setNotification', {
+        type: 'error',
+        message: 'Your session has expired. Please log in again.'
+      })
     }
+
+    store.commit('setNotification', {
+      type: 'error',
+      message: error.response?.data?.message || 'An error occurred. Please try again later.'
+    })
+
     return Promise.reject(error)
   }
 )
@@ -58,6 +99,15 @@ export const userAPI = {
   updateProfile: (data) => api.put('/users/profile', data),
   getBookings: () => api.get('/users/bookings'),
   getReviews: () => api.get('/users/reviews')
+}
+
+export const reviewAPI = {
+  // Combines both versions (yours + plugin-style)
+  getAll: () => api.get('/reviews/my-reviews'),
+  getById: (id) => api.get(`/reviews/${id}`),
+  create: (data) => api.post('/reviews', data),
+  update: (id, data) => api.put(`/reviews/${id}`, data),
+  delete: (id) => api.delete(`/reviews/${id}`)
 }
 
 export const campingSpotAPI = {
@@ -80,25 +130,6 @@ export const bookingAPI = {
   getAll: (params) => api.get('/users/bookings', { params }),
   getById: (id) => api.get(`/users/bookings/${id}`),
   cancel: (bookingId) => api.put(`/users/bookings/${bookingId}/cancel`)
-}
-
-export const reviewAPI = {
-  create: (data) => api.post('/users/reviews', data),
-  getAll: (params) => api.get('/users/reviews', { params }),
-  getById: (id) => api.get(`/users/reviews/${id}`),
-  update: (id, data) => api.put(`/users/reviews/${id}`, data),
-  delete: (id) => api.delete(`/users/reviews/${id}`)
-}
-
-export const adminAPI = {
-  getDashboardStats: () => api.get('/admin/dashboard/stats'),
-  getAllUsers: (params) => api.get('/admin/users', { params }),
-  updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
-  deleteUser: (id) => api.delete(`/admin/users/${id}`),
-  getAllBookings: (params) => api.get('/admin/bookings', { params }),
-  updateBooking: (id, data) => api.put(`/admin/bookings/${id}`, data),
-  getAllReviews: (params) => api.get('/admin/reviews', { params }),
-  updateReview: (id, data) => api.put(`/admin/reviews/${id}`, data)
 }
 
 export const ownerAPI = {
@@ -126,4 +157,4 @@ export const ownerAPI = {
   updateBookingStatus: (bookingId, status) => api.put(`/owner/bookings/${bookingId}/status`, { status })
 }
 
-export default api 
+export default api

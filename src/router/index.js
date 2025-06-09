@@ -5,16 +5,19 @@ import store from '@/store'
 Vue.use(VueRouter)
 
 // Route components
+// Public routes
 import Home from '@/views/Home.vue'
 import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import CampingSpots from '@/views/camping/CampingSpots.vue'
 import CampingSpotDetails from '@/views/camping/CampingSpotDetails.vue'
+// User routes
 import UserProfile from '@/views/user/UserProfile.vue'
 import UserBookings from '@/views/user/UserBookings.vue'
 import UserBookingDetails from '@/views/user/UserBookingDetails.vue'
 import UserReviews from '@/views/user/UserReviews.vue'
+// Owner routes
 import OwnerDashboard from '@/views/owner/OwnerDashboard.vue'
 import OwnerCampingSpots from '@/views/owner/OwnerCampingSpots.vue'
 import OwnerCampingSpotForm from '@/views/owner/OwnerCampingSpotForm.vue'
@@ -112,10 +115,7 @@ const routes = [
     component: OwnerCampingSpotForm,
     props: true,
     meta: { requiresAuth: true, ownerOnly: true }
-  },
-  
-  // Admin routes removed
-  
+  },  
   {
     path: '/owner/users',
     name: 'OwnerUsers',
