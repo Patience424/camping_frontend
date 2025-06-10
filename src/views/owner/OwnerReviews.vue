@@ -74,6 +74,7 @@ export default {
   data() {
     return {
       reviews: [],
+      campingSpots: [], // Add this
       searchQuery: '',
       ratingFilter: '',
       campingSpotFilter: ''
@@ -81,16 +82,11 @@ export default {
   },
   computed: {
     uniqueCampingSpots() {
-      const spots = [];
-      const seen = new Set();
-      for (const review of this.reviews) {
-        const spot = review.campingSpot;
-        if (spot && !seen.has(spot.id)) {
-          spots.push({ id: spot.id, name: spot.name });
-          seen.add(spot.id);
-        }
-      }
-      return spots;
+      // Show all camping spots owned by this owner
+      return this.campingSpots.map(spot => ({
+        id: spot.id,
+        name: spot.name
+      }));
     },
     filteredReviews() {
       return this.reviews.filter(review => {
@@ -111,17 +107,27 @@ export default {
   },
   async created() {
     try {
-      // Fetch reviews from API
-      const response = await ownerAPI.getReviews();
-      this.reviews = Array.isArray(response.data) ? response.data : [];
-      console.log('Fetched reviews:', this.reviews);
+      // 1. Fetch all camping spots for this owner
+      const spotsResponse = await ownerAPI.getCampingSpots();
+      this.campingSpots = Array.isArray(spotsResponse.data) ? spotsResponse.data : [];
+
+      // 2. Fetch all reviews for this owner’s camping spots
+      const reviewsResponse = await ownerAPI.getReviews();
+      const allReviews = Array.isArray(reviewsResponse.data) ? reviewsResponse.data : [];
+
+      // 3. Filter reviews to only those for this owner's spots
+      const ownerSpotIds = new Set(this.campingSpots.map(spot => spot.id));
+      this.reviews = allReviews.filter(
+        review => review.campingSpot && ownerSpotIds.has(review.campingSpot.id)
+      );
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      console.error('Error fetching data:', error);
       this.$store?.commit?.('setNotification', {
         type: 'error',
-        message: 'Failed to load reviews'
+        message: 'Failed to load reviews or camping spots'
       });
       this.reviews = [];
+      this.campingSpots = [];
     }
   },
   methods: {
@@ -326,4 +332,4 @@ export default {
   background: #f3f4f6;
   color: #374151;
 }
-</style> 
+</style>
