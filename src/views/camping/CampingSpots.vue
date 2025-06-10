@@ -30,10 +30,10 @@ It includes features for viewing spot details, active filters.
             <div class="relative">
               <select v-model="filters.priceRange" class="form-input py-2 pl-8 pr-4 rounded-full text-sm">
                 <option value="">Any price</option>
-                <option value="0-50">Under $50</option>
-                <option value="50-100">$50 - $100</option>
-                <option value="100-200">$100 - $200</option>
-                <option value="200+">$200+</option>
+                <option value="0-50">Under €50</option>
+                <option value="50-100">€50 - €100</option>
+                <option value="100-200">€100 - €200</option>
+                <option value="200+">€200+</option>
               </select>
               <svg class="h-4 w-4 text-neutral-500 absolute left-3 top-1/2 transform -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
